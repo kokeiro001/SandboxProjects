@@ -29,8 +29,13 @@
         public string Title { get; set; } = "";
 
         /// <summary>
-        /// 参加者
+        /// 参加者(配列)
         /// </summary>
-        public Player[] Players { get; set; } = [];
+        public Player[] PlayersArray { get; set; } = [];
+
+        /// <summary>
+        /// 参加者(リスト)
+        /// </summary>
+        public Player[] PlayersList { get; set; } = [];
     }
 }

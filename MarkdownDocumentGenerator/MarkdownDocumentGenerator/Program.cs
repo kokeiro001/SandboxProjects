@@ -1,4 +1,5 @@
 ﻿using System.Xml.Linq;
+using Dumpify;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,6 +11,8 @@ namespace MarkdownDocumentGenerator
 {
     internal class Program
     {
+        static readonly string TargetBaseClassName = "DTOBase";
+
         static async Task Main(string[] args)
         {
             var configuration = new ConfigurationBuilder()
@@ -25,6 +28,8 @@ namespace MarkdownDocumentGenerator
 
             // プロジェクト内のすべてのソースコードファイルを取得
             var documents = project.Documents ?? [];
+
+            var classInfos = new List<ClassInfo>();
 
             // プロジェクト内の各ソースコードファイルに対して解析を実行
             foreach (var document in documents)
@@ -52,31 +57,50 @@ namespace MarkdownDocumentGenerator
                     var classSymbol = semanticModel.GetDeclaredSymbol(classSyntax);
 
                     // TODO: 名前空間込みの名前にする
-                    if (classSymbol?.BaseType?.Name == "DTOBase")
+                    if (classSymbol?.BaseType?.Name == TargetBaseClassName)
                     {
                         Console.WriteLine($"Class {classSymbol.Name} inherits from {classSymbol.BaseType.Name}");
-
                         var docComment = classSymbol.GetDocumentationCommentXml() ?? "";
                         var classDocComment = new DocumentationComment(docComment);
 
-                        Console.WriteLine($"Documentation for class {classSymbol.Name}: {classDocComment.GetSummary()}");
-
-                        foreach (var member in classSymbol.GetMembers())
+                        var classInfo = new ClassInfo
                         {
-                            var memberDocumentationCommentXml = member.GetDocumentationCommentXml();
+                            Name = classSymbol.Name ?? "",
+                            Namespace = classSymbol.ContainingNamespace?.ToString() ?? "",
+                            Summary = classDocComment.GetSummary(),
+                        };
 
-                            if (string.IsNullOrEmpty(memberDocumentationCommentXml))
+                        Console.WriteLine($"Documentation for class {classInfo.Name}: {classInfo.Summary}");
+
+                        foreach (var propertySymbol in classSymbol.GetMembers().OfType<IPropertySymbol>())
+                        {
+                            var propertyDocumentationCommentXml = propertySymbol.GetDocumentationCommentXml();
+
+                            if (string.IsNullOrEmpty(propertyDocumentationCommentXml))
                             {
                                 continue;
                             }
 
-                            var memberDocComment = new DocumentationComment(memberDocumentationCommentXml);
+                            var propertyDocComment = new DocumentationComment(propertyDocumentationCommentXml);
 
-                            Console.WriteLine($"Documentation for member {member.Name}: Summary: {memberDocComment.GetSummary()}");
+                            var propertyInfo = new PropertyInfo
+                            {
+                                Name = propertySymbol.Name,
+                                TypeName = propertySymbol.Type.MetadataName,
+                                Summary = propertyDocComment.GetSummary(),
+                            };
+
+                            Console.WriteLine($"Documentation for member {propertyInfo.Name}: Summary: {propertyInfo.Summary}");
+
+                            classInfo.Properties.Add(propertyInfo);
                         }
+
+                        classInfos.Add(classInfo);
                     }
                 }
             }
+
+            classInfos.DumpConsole();
         }
     }
 
@@ -100,8 +124,25 @@ namespace MarkdownDocumentGenerator
         }
     }
 
-    class TypeInfo
+    class ClassInfo
     {
+        public string Name { get; set; } = "";
 
+        public string Namespace { get; set; } = "";
+
+        public string Summary { get; set; } = "";
+
+        public List<PropertyInfo> Properties { get; set; } = [];
+
+        public string FullName => string.IsNullOrEmpty(Namespace) ? Name : $"{Namespace}.{Name}";
+    }
+
+    class PropertyInfo
+    {
+        public string Name { get; set; } = "";
+
+        public string TypeName { get; set; } = "";
+
+        public string Summary { get; set; } = "";
     }
 }
