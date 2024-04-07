@@ -54,7 +54,6 @@ namespace MarkdownDocumentGenerator
                         continue;
                     }
 
-                    // TODO: 名前空間込みの名前にする
                     if (!IsInheritClass(classSymbol, TargetBaseClassName))
                     {
                         continue;
@@ -63,8 +62,6 @@ namespace MarkdownDocumentGenerator
                     Console.WriteLine($"Class {classSymbol.Name} inherits from {TargetBaseClassName}");
 
                     var classInfo = new ClassInfo(classSymbol, semanticModel);
-                    //Console.WriteLine($"Documentation for class {classInfo.Name}: {classInfo.Summary}");
-
                     classInfo.CollectProperties();
                     classInfos.Add(classInfo);
                 }
@@ -75,14 +72,16 @@ namespace MarkdownDocumentGenerator
 
         private static bool IsInheritClass(INamedTypeSymbol classSymbol, string classFullName)
         {
-            while (classSymbol.BaseType != null)
+            INamedTypeSymbol? currentSymbol = classSymbol;
+
+            while (currentSymbol.BaseType != null)
             {
-                if (classSymbol.BaseType.ToString() == classFullName)
+                if (currentSymbol.BaseType.ToString() == classFullName)
                 {
                     return true;
                 }
 
-                classSymbol = classSymbol.BaseType;
+                currentSymbol = currentSymbol.BaseType;
             }
 
             return false;
@@ -130,7 +129,7 @@ namespace MarkdownDocumentGenerator
             documentationComment = new DocumentationComment(docComment);
         }
 
-        public string Name => classSymbol.Name;
+        public string DisplayName => classSymbol.Name;
 
         public string Namespace => classSymbol.ContainingNamespace?.ToString() ?? "";
 
@@ -138,7 +137,7 @@ namespace MarkdownDocumentGenerator
 
         public List<PropertyInfo> Properties { get; set; } = [];
 
-        public string FullName => string.IsNullOrEmpty(Namespace) ? Name : $"{Namespace}.{Name}";
+        public string FullName => string.IsNullOrEmpty(Namespace) ? DisplayName : $"{Namespace}.{DisplayName}";
 
         public List<ClassInfo> AssociationClasses { get; set; } = [];
 
@@ -151,8 +150,6 @@ namespace MarkdownDocumentGenerator
                 foreach (var propertySymbol in currentClassSymbol.GetMembers().OfType<IPropertySymbol>())
                 {
                     var propertyInfo = new PropertyInfo(propertySymbol, semanticModel);
-
-                    //Console.WriteLine($"Documentation for member {propertyInfo.Name}: Summary: {propertyInfo.Summary}");
 
                     Properties.Add(propertyInfo);
                 }
@@ -179,7 +176,7 @@ namespace MarkdownDocumentGenerator
             propertyDocComment = new DocumentationComment(propertyDocumentationCommentXml);
         }
 
-        public string Name => propertySymbol.Name;
+        public string DisplayName => propertySymbol.Name;
 
         public string TypeName => GetTypeName();
 
