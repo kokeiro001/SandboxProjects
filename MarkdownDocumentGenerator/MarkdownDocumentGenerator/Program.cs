@@ -134,6 +134,12 @@ namespace MarkdownDocumentGenerator
             return GetTag("summary");
         }
 
+        public string GetRemarks()
+        {
+            var remarks = GetTag("remarks");
+            return remarks;
+        }
+
         private string GetTag(string tag)
         {
             return xmlElement?.Element(tag)?.Value?.Trim() ?? "";
@@ -159,6 +165,8 @@ namespace MarkdownDocumentGenerator
         public string Namespace => classSymbol.ContainingNamespace?.ToString() ?? "";
 
         public string Summary => documentationComment.GetSummary();
+
+        public string Remarks => documentationComment.GetRemarks();
 
         public List<PropertyInfo> Properties { get; set; } = [];
 
@@ -189,7 +197,7 @@ namespace MarkdownDocumentGenerator
     {
         private readonly IPropertySymbol propertySymbol;
         private readonly SemanticModel semanticModel;
-        private readonly DocumentationComment propertyDocComment;
+        private readonly DocumentationComment documentationComment;
 
         public PropertyInfo(IPropertySymbol propertySymbol, SemanticModel semanticModel)
         {
@@ -198,14 +206,15 @@ namespace MarkdownDocumentGenerator
 
             var propertyDocumentationCommentXml = propertySymbol.GetDocumentationCommentXml() ?? "";
 
-            propertyDocComment = new DocumentationComment(propertyDocumentationCommentXml);
+            documentationComment = new DocumentationComment(propertyDocumentationCommentXml);
         }
 
         public string DisplayName => propertySymbol.Name;
 
         public string DisplayTypeName => GetTypeName();
 
-        public string Summary => propertyDocComment.GetSummary();
+        public string Summary => documentationComment.GetSummary();
+        public string Remarks => documentationComment.GetRemarks();
 
         private string GetTypeName()
         {

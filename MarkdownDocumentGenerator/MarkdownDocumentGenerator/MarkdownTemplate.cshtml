@@ -6,10 +6,11 @@
 
 ## Properties
 
-| type | name | sumamry |
-| ---: | ---- | ------- |
+| 型名 | 名前 | 説明 | 備考 |
+| ---: | ---- | ---- | ---- |
 @foreach (var property in @Model.Properties)
 {
-    string record = string.Join(" | ", [property.DisplayTypeName, property.DisplayName, property.Summary]);
+    string record = string.Join(" | ", [property.DisplayTypeName, property.DisplayName, property.Summary, property.Remarks]);
+    record = record.Replace("\n", "<br>");
     @("| " + record +  " |\n")
 }
