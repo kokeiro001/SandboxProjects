@@ -62,19 +62,10 @@ namespace MarkdownDocumentGenerator
 
                     Console.WriteLine($"Class {classSymbol.Name} inherits from {TargetBaseClassName}");
 
-                    var classInfo = new ClassInfo(classSymbol);
+                    var classInfo = new ClassInfo(classSymbol, semanticModel);
+                    //Console.WriteLine($"Documentation for class {classInfo.Name}: {classInfo.Summary}");
 
-                    Console.WriteLine($"Documentation for class {classInfo.Name}: {classInfo.Summary}");
-
-                    foreach (var propertySymbol in classSymbol.GetMembers().OfType<IPropertySymbol>())
-                    {
-                        var propertyInfo = new PropertyInfo(propertySymbol, semanticModel);
-
-                        Console.WriteLine($"Documentation for member {propertyInfo.Name}: Summary: {propertyInfo.Summary}");
-
-                        classInfo.Properties.Add(propertyInfo);
-                    }
-
+                    classInfo.CollectProperties();
                     classInfos.Add(classInfo);
                 }
             }
@@ -128,12 +119,13 @@ namespace MarkdownDocumentGenerator
     class ClassInfo
     {
         private readonly DocumentationComment documentationComment;
-        private INamedTypeSymbol classSymbol;
+        private readonly INamedTypeSymbol classSymbol;
+        private readonly SemanticModel semanticModel;
 
-        public ClassInfo(INamedTypeSymbol classSymbol)
+        public ClassInfo(INamedTypeSymbol classSymbol, SemanticModel semanticModel)
         {
             this.classSymbol = classSymbol;
-
+            this.semanticModel = semanticModel;
             var docComment = classSymbol.GetDocumentationCommentXml() ?? "";
             documentationComment = new DocumentationComment(docComment);
         }
@@ -149,6 +141,26 @@ namespace MarkdownDocumentGenerator
         public string FullName => string.IsNullOrEmpty(Namespace) ? Name : $"{Namespace}.{Name}";
 
         public List<ClassInfo> AssociationClasses { get; set; } = [];
+
+        public void CollectProperties()
+        {
+            INamedTypeSymbol? currentClassSymbol = classSymbol;
+
+            while (currentClassSymbol != null)
+            {
+                foreach (var propertySymbol in currentClassSymbol.GetMembers().OfType<IPropertySymbol>())
+                {
+                    var propertyInfo = new PropertyInfo(propertySymbol, semanticModel);
+
+                    //Console.WriteLine($"Documentation for member {propertyInfo.Name}: Summary: {propertyInfo.Summary}");
+
+                    Properties.Add(propertyInfo);
+                }
+
+                currentClassSymbol = currentClassSymbol.BaseType;
+            }
+
+        }
     }
 
     class PropertyInfo
