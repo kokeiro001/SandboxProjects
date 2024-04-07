@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
 using Dumpify;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
@@ -116,14 +117,14 @@ namespace MarkdownDocumentGenerator
 
     public class DocumentationComment
     {
-        private readonly XElement? xmlElement;
+        private readonly IHtmlDocument? document;
 
         public DocumentationComment(string xml)
         {
-
             try
             {
-                xmlElement = XElement.Parse(xml);
+                var parser = new HtmlParser();
+                document = parser.ParseDocument(xml);
             }
             catch
             {
@@ -132,18 +133,44 @@ namespace MarkdownDocumentGenerator
 
         public string GetSummary()
         {
-            return GetElementValue("summary");
+            return GetTagText("summary");
         }
 
         public string GetRemarks()
         {
-            return GetElementValue("remarks");
+            return GetTagText("remarks");
         }
 
-        private string GetElementValue(string tag)
+        private string GetTagText(string tag)
         {
-            // spanしたいねー
-            var elementValue = xmlElement?.Element(tag)?.Value?.Trim() ?? "";
+            if (document is null)
+            {
+                return "";
+            }
+
+            var tagEelement = document.QuerySelector(tag);
+
+            if (tagEelement is null)
+            {
+                return "";
+            }
+
+            // seeタグは中身のcref, hrefをテキストとして書き起こす
+            var seeElements = tagEelement.GetElementsByTagName("see");
+            var seealsoElements = tagEelement.GetElementsByTagName("seealso");
+
+            var replaceSeeElements = seeElements.Concat(seealsoElements);
+
+            foreach (var seeElement in replaceSeeElements)
+            {
+                var newElement = document.CreateElement("span");
+                newElement.TextContent = seeElement.GetAttribute("cref") ?? seeElement.GetAttribute("href") ?? "";
+
+                // なんか直接seeElementを置き換えてもだめだったのでインサートしている
+                tagEelement.InsertBefore(newElement, seeElement);
+            }
+
+            var elementValue = tagEelement.TextContent.Trim();
 
             var trimLines = elementValue
                 .Split('\n')
