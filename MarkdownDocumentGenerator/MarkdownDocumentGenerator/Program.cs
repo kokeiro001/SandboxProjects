@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Configuration;
+using RazorEngineCore;
 
 namespace MarkdownDocumentGenerator
 {
@@ -85,9 +86,13 @@ namespace MarkdownDocumentGenerator
         {
             var outputMarkdownFilepath = Path.Combine(outputMarkdownDirectory, $"{classInfo.DisplayName}.md");
 
-            var text = classInfo.DumpText();
+            var markdownTemplate = await File.ReadAllTextAsync("MarkdownTemplate.cshtml");
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile(markdownTemplate);
 
-            await File.WriteAllTextAsync(outputMarkdownFilepath, text);
+            var result = await template.RunAsync(classInfo);
+            await File.WriteAllTextAsync(outputMarkdownFilepath, result);
+            Console.WriteLine(result);
         }
 
         private static bool IsInheritClass(INamedTypeSymbol classSymbol, string classFullName)
@@ -108,7 +113,7 @@ namespace MarkdownDocumentGenerator
         }
     }
 
-    class DocumentationComment
+    public class DocumentationComment
     {
         private readonly XElement? xmlElement;
 
@@ -135,7 +140,7 @@ namespace MarkdownDocumentGenerator
         }
     }
 
-    class ClassInfo
+    public class ClassInfo
     {
         private readonly DocumentationComment documentationComment;
         private readonly INamedTypeSymbol classSymbol;
@@ -180,7 +185,7 @@ namespace MarkdownDocumentGenerator
         }
     }
 
-    class PropertyInfo
+    public class PropertyInfo
     {
         private readonly IPropertySymbol propertySymbol;
         private readonly SemanticModel semanticModel;
@@ -198,7 +203,7 @@ namespace MarkdownDocumentGenerator
 
         public string DisplayName => propertySymbol.Name;
 
-        public string TypeName => GetTypeName();
+        public string DisplayTypeName => GetTypeName();
 
         public string Summary => propertyDocComment.GetSummary();
 

@@ -1,0 +1,14 @@
+﻿# @Model.DisplayName
+
+## Summary
+
+@Model.Summary
+
+## Properties
+
+| type | name | sumamry |
+@foreach (var property in @Model.Properties)
+{
+    string record = string.Join(" | ", [property.DisplayTypeName, property.DisplayName, property.Summary]);
+    @("| " + record +  " |\n")
+}
