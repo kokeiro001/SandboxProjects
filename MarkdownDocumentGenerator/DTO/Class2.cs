@@ -1,6 +1,19 @@
 ﻿namespace DTO
 {
     /// <summary>
+    /// 移動タイプ
+    /// </summary>
+    /// <remarks>
+    /// 動くよ
+    /// </remarks>
+    public enum MoveType
+    {
+        None,
+        Walk,
+        Run,
+    }
+
+    /// <summary>
     /// GODプレイヤー
     /// </summary>
     /// <remarks>神</remarks>
@@ -11,6 +24,14 @@
         /// nothing remarks.
         /// </summary>
         public int Rank { get; set; }
+
+        /// <summary>
+        /// 現在の移動タイプ
+        /// </summary>
+        /// <remarks>
+        /// 本当は神だからいつでもどこにでも行けるよ。
+        /// </remarks>
+        public MoveType CurrentMoveType { get; set; }
     }
 
     /// <summary>
