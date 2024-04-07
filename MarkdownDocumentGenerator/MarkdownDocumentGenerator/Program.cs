@@ -11,7 +11,7 @@ namespace MarkdownDocumentGenerator
 {
     internal class Program
     {
-        static readonly string TargetBaseClassName = "DTOBase";
+        static readonly string TargetBaseClassName = "DTO.DTOBase";
 
         static async Task Main(string[] args)
         {
@@ -25,7 +25,6 @@ namespace MarkdownDocumentGenerator
             using var workspace = MSBuildWorkspace.Create();
             var project = await workspace.OpenProjectAsync(dtoProjectFilePath);
 
-
             // プロジェクト内のすべてのソースコードファイルを取得
             var documents = project.Documents ?? [];
 
@@ -34,13 +33,6 @@ namespace MarkdownDocumentGenerator
             // プロジェクト内の各ソースコードファイルに対して解析を実行
             foreach (var document in documents)
             {
-                if (document is null)
-                {
-                    continue;
-                }
-
-
-                // SyntaxTreeを取得してソースコードを解析
                 var syntaxTree = await document.GetSyntaxTreeAsync();
                 var semanticModel = await document.GetSemanticModelAsync();
 
@@ -57,58 +49,135 @@ namespace MarkdownDocumentGenerator
                 {
                     var classSymbol = semanticModel.GetDeclaredSymbol(classSyntax);
 
-                    // TODO: 名前空間込みの名前にする
-                    if (classSymbol?.BaseType?.Name == TargetBaseClassName)
+                    if (classSymbol is null)
                     {
-                        Console.WriteLine($"Class {classSymbol.Name} inherits from {classSymbol.BaseType.Name}");
-                        var docComment = classSymbol.GetDocumentationCommentXml() ?? "";
-                        var classDocComment = new DocumentationComment(docComment);
-
-                        var classInfo = new ClassInfo
-                        {
-                            Name = classSymbol.Name ?? "",
-                            Namespace = classSymbol.ContainingNamespace?.ToString() ?? "",
-                            Summary = classDocComment.GetSummary(),
-                        };
-
-                        Console.WriteLine($"Documentation for class {classInfo.Name}: {classInfo.Summary}");
-
-                        foreach (var propertySymbol in classSymbol.GetMembers().OfType<IPropertySymbol>())
-                        {
-                            var propertyDocumentationCommentXml = propertySymbol.GetDocumentationCommentXml();
-
-                            if (string.IsNullOrEmpty(propertyDocumentationCommentXml))
-                            {
-                                continue;
-                            }
-
-                            var propertyDocComment = new DocumentationComment(propertyDocumentationCommentXml);
-
-                            var propertyInfo = new PropertyInfo
-                            {
-                                Name = propertySymbol.Name,
-                                TypeName = GetTypeName(propertySymbol, semanticModel),
-                                Summary = propertyDocComment.GetSummary(),
-                            };
-
-                            Console.WriteLine($"Documentation for member {propertyInfo.Name}: Summary: {propertyInfo.Summary}");
-
-                            classInfo.Properties.Add(propertyInfo);
-                        }
-
-                        classInfos.Add(classInfo);
+                        continue;
                     }
+
+                    // TODO: 名前空間込みの名前にする
+                    if (!IsInheritClass(classSymbol, TargetBaseClassName))
+                    {
+                        continue;
+                    }
+
+                    Console.WriteLine($"Class {classSymbol.Name} inherits from {TargetBaseClassName}");
+
+                    var classInfo = new ClassInfo(classSymbol);
+
+                    Console.WriteLine($"Documentation for class {classInfo.Name}: {classInfo.Summary}");
+
+                    foreach (var propertySymbol in classSymbol.GetMembers().OfType<IPropertySymbol>())
+                    {
+                        var propertyInfo = new PropertyInfo(propertySymbol, semanticModel);
+
+                        Console.WriteLine($"Documentation for member {propertyInfo.Name}: Summary: {propertyInfo.Summary}");
+
+                        classInfo.Properties.Add(propertyInfo);
+                    }
+
+                    classInfos.Add(classInfo);
                 }
             }
 
             classInfos.DumpConsole();
         }
 
-        private static string GetTypeName(IPropertySymbol propertySymbol, SemanticModel semanticModel)
+        private static bool IsInheritClass(INamedTypeSymbol classSymbol, string classFullName)
+        {
+            while (classSymbol.BaseType != null)
+            {
+                if (classSymbol.BaseType.ToString() == classFullName)
+                {
+                    return true;
+                }
+
+                classSymbol = classSymbol.BaseType;
+            }
+
+            return false;
+        }
+    }
+
+    class DocumentationComment
+    {
+        private readonly XElement? xmlElement;
+
+        public DocumentationComment(string xml)
+        {
+
+            try
+            {
+                xmlElement = XElement.Parse(xml);
+            }
+            catch
+            {
+            }
+        }
+
+        public string GetSummary()
+        {
+            return GetTag("summary");
+        }
+
+        private string GetTag(string tag)
+        {
+            return xmlElement?.Element(tag)?.Value?.Trim() ?? "";
+        }
+    }
+
+    class ClassInfo
+    {
+        private readonly DocumentationComment documentationComment;
+        private INamedTypeSymbol classSymbol;
+
+        public ClassInfo(INamedTypeSymbol classSymbol)
+        {
+            this.classSymbol = classSymbol;
+
+            var docComment = classSymbol.GetDocumentationCommentXml() ?? "";
+            documentationComment = new DocumentationComment(docComment);
+        }
+
+        public string Name => classSymbol.Name;
+
+        public string Namespace => classSymbol.ContainingNamespace?.ToString() ?? "";
+
+        public string Summary => documentationComment.GetSummary();
+
+        public List<PropertyInfo> Properties { get; set; } = [];
+
+        public string FullName => string.IsNullOrEmpty(Namespace) ? Name : $"{Namespace}.{Name}";
+
+        public List<ClassInfo> AssociationClasses { get; set; } = [];
+    }
+
+    class PropertyInfo
+    {
+        private readonly IPropertySymbol propertySymbol;
+        private readonly SemanticModel semanticModel;
+        private readonly DocumentationComment propertyDocComment;
+
+        public PropertyInfo(IPropertySymbol propertySymbol, SemanticModel semanticModel)
+        {
+            this.propertySymbol = propertySymbol;
+            this.semanticModel = semanticModel;
+
+            var propertyDocumentationCommentXml = propertySymbol.GetDocumentationCommentXml() ?? "";
+
+            propertyDocComment = new DocumentationComment(propertyDocumentationCommentXml);
+        }
+
+        public string Name => propertySymbol.Name;
+
+        public string TypeName => GetTypeName();
+
+        public string Summary => propertyDocComment.GetSummary();
+
+        private string GetTypeName()
         {
             var listTypeSymbol = semanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.List`1");
 
-            if (IsListType(propertySymbol.Type, listTypeSymbol!))
+            if (IsListType(listTypeSymbol!))
             {
                 var firstTypeArgument = ((INamedTypeSymbol)propertySymbol.Type).TypeArguments.First();
                 var typeName = firstTypeArgument.Name;
@@ -125,55 +194,13 @@ namespace MarkdownDocumentGenerator
             return propertySymbol.Type.Name;
         }
 
-        static bool IsListType(ITypeSymbol typeSymbol, INamedTypeSymbol listTypeSymbol)
+        private bool IsListType(INamedTypeSymbol listTypeSymbol)
         {
             // 型シンボルが List<T> かどうかを判断
-            return typeSymbol.OriginalDefinition.Equals(listTypeSymbol, SymbolEqualityComparer.Default)
-                   && typeSymbol is INamedTypeSymbol namedType
+            return propertySymbol.Type.OriginalDefinition.Equals(listTypeSymbol, SymbolEqualityComparer.Default)
+                   && propertySymbol.Type is INamedTypeSymbol namedType
                    && namedType.IsGenericType
                    && namedType.TypeArguments.Length == 1;
         }
-    }
-
-    class DocumentationComment
-    {
-        private readonly XElement xmlElement;
-
-        public DocumentationComment(string xml)
-        {
-            xmlElement = XElement.Parse(xml);
-        }
-
-        public string GetSummary()
-        {
-            return GetTag("summary");
-        }
-
-        private string GetTag(string tag)
-        {
-            return xmlElement.Element(tag)?.Value?.Trim() ?? "";
-        }
-    }
-
-    class ClassInfo
-    {
-        public string Name { get; set; } = "";
-
-        public string Namespace { get; set; } = "";
-
-        public string Summary { get; set; } = "";
-
-        public List<PropertyInfo> Properties { get; set; } = [];
-
-        public string FullName => string.IsNullOrEmpty(Namespace) ? Name : $"{Namespace}.{Name}";
-    }
-
-    class PropertyInfo
-    {
-        public string Name { get; set; } = "";
-
-        public string TypeName { get; set; } = "";
-
-        public string Summary { get; set; } = "";
     }
 }
