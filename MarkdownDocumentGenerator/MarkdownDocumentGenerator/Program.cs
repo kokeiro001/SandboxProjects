@@ -50,6 +50,10 @@ namespace MarkdownDocumentGenerator
                     continue;
                 }
 
+                // これって使いまわしていいものなのか？
+                // 同一プロジェクト内ならセーフな気がするが、document/semanticModelごとに変わったりする？わからん。
+                GlobalCache.ListTypeSymbol ??= semanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.List`1");
+
                 // 解析して特定のクラスを継承しているクラスの一覧を取得
                 var root = syntaxTree.GetCompilationUnitRoot();
                 var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
@@ -70,7 +74,7 @@ namespace MarkdownDocumentGenerator
 
                     Console.WriteLine($"Class {classSymbol.Name} inherits from {TargetBaseClassName}");
 
-                    var classInfo = new ClassInfo(classSymbol, semanticModel);
+                    var classInfo = new ClassInfo(classSymbol);
                     classInfo.CollectProperties();
                     classInfos.Add(classInfo);
                 }
@@ -184,12 +188,10 @@ namespace MarkdownDocumentGenerator
     {
         private readonly DocumentationComment documentationComment;
         private readonly INamedTypeSymbol classSymbol;
-        private readonly SemanticModel semanticModel;
 
-        public ClassInfo(INamedTypeSymbol classSymbol, SemanticModel semanticModel)
+        public ClassInfo(INamedTypeSymbol classSymbol)
         {
             this.classSymbol = classSymbol;
-            this.semanticModel = semanticModel;
             var docComment = classSymbol.GetDocumentationCommentXml() ?? "";
             documentationComment = new DocumentationComment(docComment);
         }
@@ -216,7 +218,7 @@ namespace MarkdownDocumentGenerator
             {
                 foreach (var propertySymbol in currentClassSymbol.GetMembers().OfType<IPropertySymbol>())
                 {
-                    var propertyInfo = new PropertyInfo(propertySymbol, semanticModel);
+                    var propertyInfo = new PropertyInfo(propertySymbol);
 
                     Properties.Add(propertyInfo);
                 }
@@ -227,16 +229,19 @@ namespace MarkdownDocumentGenerator
         }
     }
 
+    static class GlobalCache
+    {
+        public static INamedTypeSymbol? ListTypeSymbol { get; set; }
+    }
+
     public class PropertyInfo
     {
         private readonly IPropertySymbol propertySymbol;
-        private readonly SemanticModel semanticModel;
         private readonly DocumentationComment documentationComment;
 
-        public PropertyInfo(IPropertySymbol propertySymbol, SemanticModel semanticModel)
+        public PropertyInfo(IPropertySymbol propertySymbol)
         {
             this.propertySymbol = propertySymbol;
-            this.semanticModel = semanticModel;
 
             var propertyDocumentationCommentXml = propertySymbol.GetDocumentationCommentXml() ?? "";
 
@@ -252,9 +257,7 @@ namespace MarkdownDocumentGenerator
 
         private string GetTypeName()
         {
-            var listTypeSymbol = semanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.List`1");
-
-            if (IsListType(listTypeSymbol!))
+            if (IsListType())
             {
                 var firstTypeArgument = ((INamedTypeSymbol)propertySymbol.Type).TypeArguments.First();
                 var typeName = firstTypeArgument.Name;
@@ -271,10 +274,9 @@ namespace MarkdownDocumentGenerator
             return propertySymbol.Type.Name;
         }
 
-        private bool IsListType(INamedTypeSymbol listTypeSymbol)
+        private bool IsListType()
         {
-            // 型シンボルが List<T> かどうかを判断
-            return propertySymbol.Type.OriginalDefinition.Equals(listTypeSymbol, SymbolEqualityComparer.Default)
+            return propertySymbol.Type.OriginalDefinition.Equals(GlobalCache.ListTypeSymbol, SymbolEqualityComparer.Default)
                    && propertySymbol.Type is INamedTypeSymbol namedType
                    && namedType.IsGenericType
                    && namedType.TypeArguments.Length == 1;
