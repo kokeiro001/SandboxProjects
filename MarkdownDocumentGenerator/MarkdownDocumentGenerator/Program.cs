@@ -39,11 +39,12 @@ namespace MarkdownDocumentGenerator
                     continue;
                 }
 
+
                 // SyntaxTreeを取得してソースコードを解析
                 var syntaxTree = await document.GetSyntaxTreeAsync();
                 var semanticModel = await document.GetSemanticModelAsync();
 
-                if (syntaxTree is null)
+                if (syntaxTree is null || semanticModel is null)
                 {
                     continue;
                 }
@@ -86,7 +87,7 @@ namespace MarkdownDocumentGenerator
                             var propertyInfo = new PropertyInfo
                             {
                                 Name = propertySymbol.Name,
-                                TypeName = propertySymbol.Type.MetadataName,
+                                TypeName = GetTypeName(propertySymbol, semanticModel),
                                 Summary = propertyDocComment.GetSummary(),
                             };
 
@@ -101,6 +102,36 @@ namespace MarkdownDocumentGenerator
             }
 
             classInfos.DumpConsole();
+        }
+
+        private static string GetTypeName(IPropertySymbol propertySymbol, SemanticModel semanticModel)
+        {
+            var listTypeSymbol = semanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.List`1");
+
+            if (IsListType(propertySymbol.Type, listTypeSymbol!))
+            {
+                var firstTypeArgument = ((INamedTypeSymbol)propertySymbol.Type).TypeArguments.First();
+                var typeName = firstTypeArgument.Name;
+
+                return $"List<{typeName}>";
+            }
+
+            if (propertySymbol.Type.Kind == SymbolKind.ArrayType
+                && propertySymbol.Type is IArrayTypeSymbol arrayTypeSymbol)
+            {
+                return $"{arrayTypeSymbol.ElementType.Name}[]";
+            }
+
+            return propertySymbol.Type.Name;
+        }
+
+        static bool IsListType(ITypeSymbol typeSymbol, INamedTypeSymbol listTypeSymbol)
+        {
+            // 型シンボルが List<T> かどうかを判断
+            return typeSymbol.OriginalDefinition.Equals(listTypeSymbol, SymbolEqualityComparer.Default)
+                   && typeSymbol is INamedTypeSymbol namedType
+                   && namedType.IsGenericType
+                   && namedType.TypeArguments.Length == 1;
         }
     }
 

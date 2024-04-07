@@ -36,6 +36,6 @@
         /// <summary>
         /// 参加者(リスト)
         /// </summary>
-        public Player[] PlayersList { get; set; } = [];
+        public List<Player> PlayersList { get; set; } = [];
     }
 }
