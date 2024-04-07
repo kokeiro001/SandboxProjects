@@ -12,9 +12,14 @@ using Spectre.Console;
 
 namespace MarkdownDocumentGenerator
 {
+    public static class Constants
+    {
+        public static readonly string TargetBaseClassName = "DTO.DTOBase";
+        public static readonly string TargetBaseNamespace = "DTO";
+    }
+
     internal class Program
     {
-        static readonly string TargetBaseClassName = "DTO.DTOBase";
 
         static async Task Main(string[] args)
         {
@@ -67,12 +72,12 @@ namespace MarkdownDocumentGenerator
                         continue;
                     }
 
-                    if (!IsInheritClass(classSymbol, TargetBaseClassName))
+                    if (!IsInheritClass(classSymbol, Constants.TargetBaseClassName))
                     {
                         continue;
                     }
 
-                    Console.WriteLine($"Class {classSymbol.Name} inherits from {TargetBaseClassName}");
+                    Console.WriteLine($"Class {classSymbol.Name} inherits from {Constants.TargetBaseClassName}");
 
                     var classInfo = new ClassInfo(classSymbol);
                     classInfo.CollectProperties();
@@ -254,7 +259,7 @@ namespace MarkdownDocumentGenerator
                     }
 
                     // 同一アセンブリで定義されている独自のクラスのみ対象とする
-                    if (classInfo.Namespace == "DTO")
+                    if (classInfo.Namespace == Constants.TargetBaseNamespace)
                     {
                         // この型を直接情報として追加する
                         associationClasses.Add(classInfo);
@@ -265,7 +270,7 @@ namespace MarkdownDocumentGenerator
                         // List<T>とかの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
                         var targetTypeArguments = namedTypoeSymbol.TypeArguments.OfType<INamedTypeSymbol>()
                             .Where(x => x.TypeKind is TypeKind.Class)
-                            .Where(x => x.ContainingNamespace.Name == "DTO");
+                            .Where(x => x.ContainingNamespace.Name == Constants.TargetBaseNamespace);
 
                         foreach (var targetTypeArgument in targetTypeArguments)
                         {
