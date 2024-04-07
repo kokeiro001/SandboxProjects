@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Configuration;
 using RazorEngineCore;
+using Spectre.Console;
 
 namespace MarkdownDocumentGenerator
 {
@@ -131,18 +132,24 @@ namespace MarkdownDocumentGenerator
 
         public string GetSummary()
         {
-            return GetTag("summary");
+            return GetElementValue("summary");
         }
 
         public string GetRemarks()
         {
-            var remarks = GetTag("remarks");
-            return remarks;
+            return GetElementValue("remarks");
         }
 
-        private string GetTag(string tag)
+        private string GetElementValue(string tag)
         {
-            return xmlElement?.Element(tag)?.Value?.Trim() ?? "";
+            // spanしたいねー
+            var elementValue = xmlElement?.Element(tag)?.Value?.Trim() ?? "";
+
+            var trimLines = elementValue
+                .Split('\n')
+                .Select(x => x.Trim());
+
+            return string.Join('\n', trimLines);
         }
     }
 
