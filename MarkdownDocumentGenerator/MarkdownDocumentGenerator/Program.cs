@@ -212,20 +212,84 @@ namespace MarkdownDocumentGenerator
 
         public void CollectProperties()
         {
-            INamedTypeSymbol? currentClassSymbol = classSymbol;
+            InternalCollectProperties(classSymbol, AssociationClasses, 0);
+        }
 
-            while (currentClassSymbol != null)
+        private void InternalCollectProperties(INamedTypeSymbol baseSymbol, List<ClassInfo> associationClasses, int depth)
+        {
+            if (depth > 3)
             {
-                foreach (var propertySymbol in currentClassSymbol.GetMembers().OfType<IPropertySymbol>())
+                return;
+            }
+
+            INamedTypeSymbol? currentSymbol = baseSymbol;
+
+            // 継承元のクラスのプロパティも取得する
+            while (currentSymbol != null)
+            {
+                foreach (var propertySymbol in currentSymbol.GetMembers().OfType<IPropertySymbol>())
                 {
                     var propertyInfo = new PropertyInfo(propertySymbol);
 
                     Properties.Add(propertyInfo);
                 }
 
-                currentClassSymbol = currentClassSymbol.BaseType;
+                currentSymbol = currentSymbol.BaseType;
             }
 
+            // プロパティとして取得した型がクラスか構造体の場合、関連クラスとして追加する
+            foreach (var propertyInfo in Properties)
+            {
+                //  TODO: 構造体の場合も同様の処理でいける？ or TypeKind.Struct でいける？
+                if (propertyInfo.Symbol.Type.TypeKind is TypeKind.Class)
+                {
+                    var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
+
+                    var classInfo = new ClassInfo(namedTypoeSymbol);
+
+                    // 循環参照を防ぐため、すでに取得済みのクラスはスキップする
+                    if (associationClasses.Any(x => x.FullName == classInfo.FullName))
+                    {
+                        continue;
+                    }
+
+                    // 同一アセンブリで定義されている独自のクラスのみ対象とする
+                    if (classInfo.Namespace == "DTO")
+                    {
+                        // この型を直接情報として追加する
+                        associationClasses.Add(classInfo);
+                        classInfo.InternalCollectProperties(classInfo.classSymbol, associationClasses, depth + 1);
+                    }
+                    else
+                    {
+                        // List<T>とかの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
+                        var targetTypeArguments = namedTypoeSymbol.TypeArguments.OfType<INamedTypeSymbol>()
+                            .Where(x => x.TypeKind is TypeKind.Class)
+                            .Where(x => x.ContainingNamespace.Name == "DTO");
+
+                        foreach (var targetTypeArgument in targetTypeArguments)
+                        {
+                            var argumentClassInfo = new ClassInfo(targetTypeArgument);
+                            if (associationClasses.Any(x => x.FullName == argumentClassInfo.FullName))
+                            {
+                                continue;
+                            }
+
+                            associationClasses.Add(argumentClassInfo);
+                            argumentClassInfo.InternalCollectProperties(argumentClassInfo.classSymbol, associationClasses, depth + 1);
+                        }
+                    }
+                }
+            }
+
+            // TODO: プロパティとして取得した形がenumの場合、enumの値を取得する
+            foreach (var propertyInfo in Properties)
+            {
+                if (propertyInfo.Symbol.Type.TypeKind == TypeKind.Enum)
+                {
+                    // implement
+                }
+            }
         }
     }
 
@@ -236,19 +300,20 @@ namespace MarkdownDocumentGenerator
 
     public class PropertyInfo
     {
-        private readonly IPropertySymbol propertySymbol;
         private readonly DocumentationComment documentationComment;
+
+        public IPropertySymbol Symbol { get; init; }
 
         public PropertyInfo(IPropertySymbol propertySymbol)
         {
-            this.propertySymbol = propertySymbol;
+            this.Symbol = propertySymbol;
 
             var propertyDocumentationCommentXml = propertySymbol.GetDocumentationCommentXml() ?? "";
 
             documentationComment = new DocumentationComment(propertyDocumentationCommentXml);
         }
 
-        public string DisplayName => propertySymbol.Name;
+        public string DisplayName => Symbol.Name;
 
         public string DisplayTypeName => GetTypeName();
 
@@ -259,25 +324,25 @@ namespace MarkdownDocumentGenerator
         {
             if (IsListType())
             {
-                var firstTypeArgument = ((INamedTypeSymbol)propertySymbol.Type).TypeArguments.First();
+                var firstTypeArgument = ((INamedTypeSymbol)Symbol.Type).TypeArguments.First();
                 var typeName = firstTypeArgument.Name;
 
                 return $"List<{typeName}>";
             }
 
-            if (propertySymbol.Type.Kind == SymbolKind.ArrayType
-                && propertySymbol.Type is IArrayTypeSymbol arrayTypeSymbol)
+            if (Symbol.Type.Kind == SymbolKind.ArrayType
+                && Symbol.Type is IArrayTypeSymbol arrayTypeSymbol)
             {
                 return $"{arrayTypeSymbol.ElementType.Name}[]";
             }
 
-            return propertySymbol.Type.Name;
+            return Symbol.Type.Name;
         }
 
         private bool IsListType()
         {
-            return propertySymbol.Type.OriginalDefinition.Equals(GlobalCache.ListTypeSymbol, SymbolEqualityComparer.Default)
-                   && propertySymbol.Type is INamedTypeSymbol namedType
+            return Symbol.Type.OriginalDefinition.Equals(GlobalCache.ListTypeSymbol, SymbolEqualityComparer.Default)
+                   && Symbol.Type is INamedTypeSymbol namedType
                    && namedType.IsGenericType
                    && namedType.TypeArguments.Length == 1;
         }

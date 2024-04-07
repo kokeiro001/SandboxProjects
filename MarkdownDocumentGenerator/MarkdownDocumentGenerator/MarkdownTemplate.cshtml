@@ -6,7 +6,8 @@
 
 @if (!string.IsNullOrEmpty(Model.Remarks))
 {
-    @("## 備考\n")
+    @("### 備考\n")
+    @("\n")
     @(@Model.Remarks + "\n")
 }
 
@@ -18,5 +19,47 @@
 {
     string record = string.Join(" | ", [property.DisplayTypeName, property.DisplayName, property.Summary, property.Remarks]);
     record = record.Replace("\n", "<br>");
-    @("| " + record +  " |\n")
+    @("| " + record + " |\n")
+}
+
+@("---\n")
+
+@if (@Model.AssociationClasses.Count > 0)
+{
+    @("## 関連クラス\n")
+}
+
+@foreach (var associationClass in @Model.AssociationClasses)
+{
+    @($"### {associationClass.DisplayName}\n")
+    @("\n")
+
+    @("### 概要\n")
+    @("\n")
+    @($"{@associationClass.Summary}\n")
+    @("\n")
+
+    @if (!string.IsNullOrEmpty(associationClass.Remarks))
+{
+        @("#### 備考\n")
+        @("\n")
+        @($"{associationClass.Remarks}\n")
+        @("\n")
+    }
+
+    @("### プロパティ\n")
+    @("\n")
+
+    @("| 型名 | 名前 | 説明 | 備考 |\n")
+    @("| ---: | ---- | ---- | ---- |\n")
+
+    @foreach (var property in associationClass.Properties)
+    {
+        string record = string.Join(" | ", [property.DisplayTypeName, property.DisplayName, property.Summary, property.Remarks]);
+        record = record.Replace("\n", "<br>");
+        @("| " + record + " |\n")
+    }
+
+    @("\n")
+    @("---\n")
 }
