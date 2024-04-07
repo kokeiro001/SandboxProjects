@@ -19,7 +19,13 @@ namespace MarkdownDocumentGenerator
                 .AddUserSecrets<Program>()
                 .Build();
 
-            var dtoProjectFilePath = configuration["DTOProjectPath"];
+            var dtoProjectFilePath = configuration["DTOProjectPath"] ?? "";
+            var outputMarkdownDirectory = configuration["OutputMarkdownDirectory"] ?? "";
+
+            if (!Directory.Exists(outputMarkdownDirectory))
+            {
+                Directory.CreateDirectory(outputMarkdownDirectory);
+            }
 
             MSBuildLocator.RegisterDefaults();
             using var workspace = MSBuildWorkspace.Create();
@@ -68,6 +74,20 @@ namespace MarkdownDocumentGenerator
             }
 
             classInfos.DumpConsole();
+
+            foreach (var classInfo in classInfos)
+            {
+                await RenderMarkdown(classInfo, outputMarkdownDirectory);
+            }
+        }
+
+        static async Task RenderMarkdown(ClassInfo classInfo, string outputMarkdownDirectory)
+        {
+            var outputMarkdownFilepath = Path.Combine(outputMarkdownDirectory, $"{classInfo.DisplayName}.md");
+
+            var text = classInfo.DumpText();
+
+            await File.WriteAllTextAsync(outputMarkdownFilepath, text);
         }
 
         private static bool IsInheritClass(INamedTypeSymbol classSymbol, string classFullName)
