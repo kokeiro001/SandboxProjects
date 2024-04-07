@@ -1,10 +1,16 @@
 ﻿# @Model.DisplayName
 
-## Summary
+## 概要
 
 @Model.Summary
 
-## Properties
+@if (!string.IsNullOrEmpty(Model.Remarks))
+{
+    @("## 備考\n")
+    @(@Model.Remarks + "\n")
+}
+
+## プロパティ
 
 | 型名 | 名前 | 説明 | 備考 |
 | ---: | ---- | ---- | ---- |
