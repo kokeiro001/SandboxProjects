@@ -7,8 +7,6 @@ namespace MarkdownDocumentGenerator
     {
         public string TargetBaseClassName { get; init; } = ""; // ex. DTO.DTOBase
 
-        public string TargetBaseNamespace { get; init; } = ""; // ex. DTO
-
         public string ProjectPath { get; init; } = "";
 
         public string OutputMarkdownDirectory { get; init; } = "";
@@ -22,11 +20,6 @@ namespace MarkdownDocumentGenerator
             if (string.IsNullOrWhiteSpace(config.TargetBaseClassName))
             {
                 stringBuilder.AppendLine($"{nameof(TargetBaseClassName)} is required.");
-            }
-
-            if (string.IsNullOrWhiteSpace(config.TargetBaseNamespace))
-            {
-                stringBuilder.AppendLine($"{nameof(TargetBaseNamespace)} is required.");
             }
 
             if (string.IsNullOrWhiteSpace(config.ProjectPath))

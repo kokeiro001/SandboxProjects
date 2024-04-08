@@ -5,21 +5,26 @@ namespace MarkdownDocumentGenerator
     public class ClassInfo
     {
         private readonly DocumentationComment documentationComment;
-        private readonly INamedTypeSymbol classSymbol;
         private readonly Config config;
 
         public ClassInfo(INamedTypeSymbol classSymbol, Config config)
         {
-            this.classSymbol = classSymbol;
+            this.Symbol = classSymbol;
             this.config = config;
 
             var docComment = classSymbol.GetDocumentationCommentXml() ?? "";
             documentationComment = new DocumentationComment(docComment);
         }
 
-        public string DisplayName => classSymbol.Name;
+        override public string ToString()
+        {
+            return FullName;
+        }
+        public INamedTypeSymbol Symbol { get; }
 
-        public string Namespace => classSymbol.ContainingNamespace?.ToString() ?? "";
+        public string DisplayName => Symbol.Name;
+
+        public string Namespace => Symbol.ContainingNamespace?.ToString() ?? "";
 
         public string Summary => documentationComment.GetSummary();
 
@@ -33,7 +38,7 @@ namespace MarkdownDocumentGenerator
 
         public void CollectProperties()
         {
-            InternalCollectProperties(classSymbol, AssociationClasses, 0);
+            InternalCollectProperties(Symbol, AssociationClasses, 0);
         }
 
         private void InternalCollectProperties(INamedTypeSymbol baseSymbol, List<ClassInfo> associationClasses, int depth)
@@ -75,18 +80,19 @@ namespace MarkdownDocumentGenerator
                     }
 
                     // 同一アセンブリで定義されている独自のクラスのみ対象とする
-                    if (classInfo.Namespace == config.TargetBaseClassName)
+                    if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyInfo.Symbol.Type.ContainingAssembly))
                     {
                         // この型を直接情報として追加する
                         associationClasses.Add(classInfo);
-                        classInfo.InternalCollectProperties(classInfo.classSymbol, associationClasses, depth + 1);
+                        classInfo.InternalCollectProperties(classInfo.Symbol, associationClasses, depth + 1);
                     }
                     else
                     {
                         // List<T>とかの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
                         var targetTypeArguments = namedTypoeSymbol.TypeArguments.OfType<INamedTypeSymbol>()
                             .Where(x => x.TypeKind is TypeKind.Class)
-                            .Where(x => x.ContainingNamespace.Name == config.TargetBaseNamespace);
+                            .Where(x => AreContainingSameAssembly(baseSymbol.ContainingAssembly, x.ContainingAssembly))
+                            .ToArray();
 
                         foreach (var targetTypeArgument in targetTypeArguments)
                         {
@@ -97,7 +103,7 @@ namespace MarkdownDocumentGenerator
                             }
 
                             associationClasses.Add(argumentClassInfo);
-                            argumentClassInfo.InternalCollectProperties(argumentClassInfo.classSymbol, associationClasses, depth + 1);
+                            argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, associationClasses, depth + 1);
                         }
                     }
                 }
@@ -111,6 +117,19 @@ namespace MarkdownDocumentGenerator
                     // implement
                 }
             }
+        }
+
+        private static bool AreContainingSameAssembly(IAssemblySymbol left, IAssemblySymbol right)
+        {
+            // どっちもnullで同一判定になると困るのでnullチェック
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            var result = SymbolEqualityComparer.Default.Equals(left, right);
+
+            return result;
         }
     }
 }

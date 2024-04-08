@@ -17,6 +17,11 @@ namespace MarkdownDocumentGenerator
             documentationComment = new DocumentationComment(propertyDocumentationCommentXml);
         }
 
+        override public string ToString()
+        {
+            return $"{DisplayTypeName} {DisplayName}";
+        }
+
         public string DisplayName => Symbol.Name;
 
         public string DisplayTypeName => GetTypeName();
