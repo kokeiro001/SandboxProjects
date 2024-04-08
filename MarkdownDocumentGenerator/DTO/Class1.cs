@@ -28,6 +28,39 @@
     }
 
     /// <summary>
+    /// アイテム1
+    /// </summary>
+    public class Item1
+    {
+        /// <summary>
+        /// 名前1
+        /// </summary>
+        public string Name1 { get; set; } = "";
+    }
+
+    /// <summary>
+    /// アイテム2
+    /// </summary>
+    public class Item2
+    {
+        /// <summary>
+        /// 名前2
+        /// </summary>
+        public string Name2 { get; set; } = "";
+    }
+
+    /// <summary>
+    /// アイテム3
+    /// </summary>
+    public class Item3
+    {
+        /// <summary>
+        /// 名前3
+        /// </summary>
+        public string Name3 { get; set; } = "";
+    }
+
+    /// <summary>
     /// ゲーム情報
     /// </summary>
     /// <remarks>
@@ -52,5 +85,20 @@
         /// </summary>
         /// <remarks>ReadOnlyListとかくると都度対応が必要な実装でだるいよー</remarks>
         public List<Player> PlayersList { get; set; } = [];
+
+        /// <summary>
+        /// アイテム1あるかも
+        /// </summary>
+        public Item1? Item1 { get; set; }
+
+        /// <summary>
+        /// アイテム2あるかも
+        /// </summary>
+        public Item2? Item2 { get; set; }
+
+        /// <summary>
+        /// アイテム3あるかも
+        /// </summary>
+        public Item3? Item3 { get; set; }
     }
 }
