@@ -6,10 +6,13 @@ namespace MarkdownDocumentGenerator
     {
         private readonly DocumentationComment documentationComment;
         private readonly INamedTypeSymbol classSymbol;
+        private readonly Config config;
 
-        public ClassInfo(INamedTypeSymbol classSymbol)
+        public ClassInfo(INamedTypeSymbol classSymbol, Config config)
         {
             this.classSymbol = classSymbol;
+            this.config = config;
+
             var docComment = classSymbol.GetDocumentationCommentXml() ?? "";
             documentationComment = new DocumentationComment(docComment);
         }
@@ -63,7 +66,7 @@ namespace MarkdownDocumentGenerator
                 {
                     var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
 
-                    var classInfo = new ClassInfo(namedTypoeSymbol);
+                    var classInfo = new ClassInfo(namedTypoeSymbol, config);
 
                     // 循環参照を防ぐため、すでに取得済みのクラスはスキップする
                     if (associationClasses.Any(x => x.FullName == classInfo.FullName))
@@ -72,7 +75,7 @@ namespace MarkdownDocumentGenerator
                     }
 
                     // 同一アセンブリで定義されている独自のクラスのみ対象とする
-                    if (classInfo.Namespace == Constants.TargetBaseNamespace)
+                    if (classInfo.Namespace == config.TargetBaseClassName)
                     {
                         // この型を直接情報として追加する
                         associationClasses.Add(classInfo);
@@ -83,11 +86,11 @@ namespace MarkdownDocumentGenerator
                         // List<T>とかの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
                         var targetTypeArguments = namedTypoeSymbol.TypeArguments.OfType<INamedTypeSymbol>()
                             .Where(x => x.TypeKind is TypeKind.Class)
-                            .Where(x => x.ContainingNamespace.Name == Constants.TargetBaseNamespace);
+                            .Where(x => x.ContainingNamespace.Name == config.TargetBaseNamespace);
 
                         foreach (var targetTypeArgument in targetTypeArguments)
                         {
-                            var argumentClassInfo = new ClassInfo(targetTypeArgument);
+                            var argumentClassInfo = new ClassInfo(targetTypeArgument, config);
                             if (associationClasses.Any(x => x.FullName == argumentClassInfo.FullName))
                             {
                                 continue;

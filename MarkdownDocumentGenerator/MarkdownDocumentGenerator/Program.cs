@@ -14,23 +14,20 @@ namespace MarkdownDocumentGenerator
         public static INamedTypeSymbol? ListTypeSymbol { get; set; }
     }
 
-    public static class Constants
+    public class Program
     {
-        public static readonly string TargetBaseClassName = "DTO.DTOBase";
-        public static readonly string TargetBaseNamespace = "DTO";
-    }
-
-    internal class Program
-    {
-
         static async Task Main(string[] args)
         {
-            var configuration = new ConfigurationBuilder()
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
                 .AddUserSecrets<Program>()
-                .Build();
+                .Build()
+                .Get<Config>();
 
-            var dtoProjectFilePath = configuration["DTOProjectPath"] ?? "";
-            var outputMarkdownDirectory = configuration["OutputMarkdownDirectory"] ?? "";
+            ArgumentNullException.ThrowIfNull(config);
+
+            var dtoProjectFilePath = config.ProjectPath;
+            var outputMarkdownDirectory = config.OutputMarkdownDirectory;
 
             if (!Directory.Exists(outputMarkdownDirectory))
             {
@@ -74,14 +71,14 @@ namespace MarkdownDocumentGenerator
                         continue;
                     }
 
-                    if (!IsInheritClass(classSymbol, Constants.TargetBaseClassName))
+                    if (!IsInheritClass(classSymbol, config.TargetBaseClassName))
                     {
                         continue;
                     }
 
-                    Console.WriteLine($"Class {classSymbol.Name} inherits from {Constants.TargetBaseClassName}");
+                    Console.WriteLine($"Class {classSymbol.Name} inherits from {config.TargetBaseClassName}");
 
-                    var classInfo = new ClassInfo(classSymbol);
+                    var classInfo = new ClassInfo(classSymbol, config);
                     classInfo.CollectProperties();
                     classInfos.Add(classInfo);
                 }
