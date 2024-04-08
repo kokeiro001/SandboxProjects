@@ -122,7 +122,9 @@
     }
 
     /// <summary>
-    /// 食べ物リクエスト
+    /// 食べ物リクエスト。
+    /// あれも食べたい。
+    /// これも食べたい。
     /// <results>
     ///   <result><see cref="Result.NotEnoughMoney"/></result>
     ///   <result><see cref="Result.NotFoundFood"/></result>
@@ -131,7 +133,8 @@
     public class RequestFood : RequestBase
     {
         /// <summary>
-        /// 食べ物名
+        /// 食べ物名。
+        /// 一品までだよ。
         /// </summary>
         public string FoodName { get; set; } = "";
     }
