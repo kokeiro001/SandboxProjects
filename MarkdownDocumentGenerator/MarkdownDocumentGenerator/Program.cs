@@ -24,19 +24,16 @@ namespace MarkdownDocumentGenerator
                 .Build()
                 .Get<Config>();
 
-            ArgumentNullException.ThrowIfNull(config);
+            Config.Validate(config);
 
-            var dtoProjectFilePath = config.ProjectPath;
-            var outputMarkdownDirectory = config.OutputMarkdownDirectory;
-
-            if (!Directory.Exists(outputMarkdownDirectory))
+            if (!Directory.Exists(config.OutputMarkdownDirectory))
             {
-                Directory.CreateDirectory(outputMarkdownDirectory);
+                Directory.CreateDirectory(config.OutputMarkdownDirectory);
             }
 
             MSBuildLocator.RegisterDefaults();
             using var workspace = MSBuildWorkspace.Create();
-            var project = await workspace.OpenProjectAsync(dtoProjectFilePath);
+            var project = await workspace.OpenProjectAsync(config.ProjectPath);
 
             // プロジェクト内のすべてのソースコードファイルを取得
             var documents = project.Documents ?? [];
@@ -88,7 +85,7 @@ namespace MarkdownDocumentGenerator
 
             foreach (var classInfo in classInfos)
             {
-                await RenderMarkdown(classInfo, outputMarkdownDirectory);
+                await RenderMarkdown(classInfo, config.OutputMarkdownDirectory);
             }
         }
 
