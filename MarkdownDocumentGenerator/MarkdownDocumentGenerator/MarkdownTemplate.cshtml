@@ -2,7 +2,7 @@
 
 ## 概要
 
-@Model.Summary
+@Model.Summary.Replace("\n", "<br>");
 
 @if (!string.IsNullOrEmpty(Model.Remarks))
 {
