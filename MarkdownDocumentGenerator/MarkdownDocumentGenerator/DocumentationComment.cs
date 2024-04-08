@@ -1,4 +1,5 @@
-﻿using AngleSharp.Html.Dom;
+﻿using AngleSharp.Dom;
+using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Microsoft.CodeAnalysis;
 using Spectre.Console;
@@ -45,28 +46,28 @@ namespace MarkdownDocumentGenerator
                 return "";
             }
 
+            var tempTagElement = (IElement)tagEelement.Clone(true);
+
             // seeタグは中身のcref, hrefをテキストとして書き起こす
-            var seeElements = tagEelement.GetElementsByTagName("see");
-            var seealsoElements = tagEelement.GetElementsByTagName("seealso");
+            var seeTags = tempTagElement.QuerySelectorAll("see");
+            var seealsoTags = tempTagElement.QuerySelectorAll("seealso");
 
-            var replaceSeeElements = seeElements.Concat(seealsoElements);
+            var replaceTags = seeTags.Concat(seealsoTags);
 
-            foreach (var seeElement in replaceSeeElements)
+            foreach (var seeTag in replaceTags)
             {
-                var newElement = document.CreateElement("span");
-                newElement.TextContent = seeElement.GetAttribute("cref") ?? seeElement.GetAttribute("href") ?? "";
-
-                // なんか直接seeElementを置き換えてもだめだったのでインサートしている
-                tagEelement.InsertBefore(newElement, seeElement);
+                var spanElement = document.CreateElement("span");
+                spanElement.TextContent = seeTag.GetAttribute("cref") ?? seeTag.GetAttribute("href") ?? "";
+                seeTag.Parent!.ReplaceChild(spanElement, seeTag);
             }
 
-            var elementValue = tagEelement.TextContent.Trim();
+            var elementValue = tempTagElement.TextContent.Trim();
 
             var trimLines = elementValue
                 .Split('\n')
                 .Select(x => x.Trim());
 
-            return string.Join('\n', trimLines);
+            return string.Join("\n", trimLines);
         }
     }
 }
