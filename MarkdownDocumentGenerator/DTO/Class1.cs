@@ -101,4 +101,38 @@
         /// </summary>
         public Item3? Item3 { get; set; }
     }
+
+    public abstract class RequestBase
+    {
+    }
+
+    public enum Result
+    {
+        /// <summary>成功</summary>
+        Success = 0,
+
+        /// <summary>失敗</summary>
+        Failure = 10,
+
+        /// <summary>金欠</summary>
+        NotEnoughMoney = 20,
+
+        /// <summary>食べ物が見つからない</summary>
+        NotFoundFood = 30,
+    }
+
+    /// <summary>
+    /// 食べ物リクエスト
+    /// <results>
+    ///   <result><see cref="Result.NotEnoughMoney"/></result>
+    ///   <result><see cref="Result.NotFoundFood"/></result>
+    /// </results>
+    /// </summary>
+    public class RequestFood : RequestBase
+    {
+        /// <summary>
+        /// 食べ物名
+        /// </summary>
+        public string FoodName { get; set; } = "";
+    }
 }
