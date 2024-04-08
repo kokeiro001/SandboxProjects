@@ -86,25 +86,23 @@ namespace MarkdownDocumentGenerator
                         associationClasses.Add(classInfo);
                         classInfo.InternalCollectProperties(classInfo.Symbol, associationClasses, depth + 1);
                     }
-                    else
+
+                    // List<T>とかジェネリックの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
+                    var targetTypeArguments = namedTypoeSymbol.TypeArguments.OfType<INamedTypeSymbol>()
+                        .Where(x => x.TypeKind is TypeKind.Class)
+                        .Where(x => AreContainingSameAssembly(baseSymbol.ContainingAssembly, x.ContainingAssembly))
+                        .ToArray();
+
+                    foreach (var targetTypeArgument in targetTypeArguments)
                     {
-                        // List<T>とかの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
-                        var targetTypeArguments = namedTypoeSymbol.TypeArguments.OfType<INamedTypeSymbol>()
-                            .Where(x => x.TypeKind is TypeKind.Class)
-                            .Where(x => AreContainingSameAssembly(baseSymbol.ContainingAssembly, x.ContainingAssembly))
-                            .ToArray();
-
-                        foreach (var targetTypeArgument in targetTypeArguments)
+                        var argumentClassInfo = new ClassInfo(targetTypeArgument, config);
+                        if (associationClasses.Any(x => x.FullName == argumentClassInfo.FullName))
                         {
-                            var argumentClassInfo = new ClassInfo(targetTypeArgument, config);
-                            if (associationClasses.Any(x => x.FullName == argumentClassInfo.FullName))
-                            {
-                                continue;
-                            }
-
-                            associationClasses.Add(argumentClassInfo);
-                            argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, associationClasses, depth + 1);
+                            continue;
                         }
+
+                        associationClasses.Add(argumentClassInfo);
+                        argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, associationClasses, depth + 1);
                     }
                 }
             }
