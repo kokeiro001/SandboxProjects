@@ -1,10 +1,19 @@
-﻿namespace SerilogSandbox
+﻿using Serilog;
+
+namespace SerilogSandbox
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateLogger();
+
+
+            var logger = Log.ForContext<Program>();
+
+            logger.Information("Hello, World!");
         }
     }
 }
