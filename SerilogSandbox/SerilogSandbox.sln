@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogSandbox", "SerilogSandbox\SerilogSandbox.csproj", "{87D7E692-8640-4446-A52A-FFD5CED8C144}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SerilogSandbox", "SerilogSandbox\SerilogSandbox.csproj", "{87D7E692-8640-4446-A52A-FFD5CED8C144}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutputFormatSandbox", "OutputFormatSandbox\OutputFormatSandbox.csproj", "{60DD75D7-6233-4289-B2E4-39CE83E2FB35}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{87D7E692-8640-4446-A52A-FFD5CED8C144}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87D7E692-8640-4446-A52A-FFD5CED8C144}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87D7E692-8640-4446-A52A-FFD5CED8C144}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60DD75D7-6233-4289-B2E4-39CE83E2FB35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60DD75D7-6233-4289-B2E4-39CE83E2FB35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60DD75D7-6233-4289-B2E4-39CE83E2FB35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60DD75D7-6233-4289-B2E4-39CE83E2FB35}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
