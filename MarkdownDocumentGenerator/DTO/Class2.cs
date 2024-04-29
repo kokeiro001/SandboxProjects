@@ -77,4 +77,41 @@
         /// </remarks>
         public int WorldId { get; set; }
     }
+
+
+    /// <summary>
+    /// Nullableパース検証用
+    /// </summary>
+    public class NullableDTO : DTOBase
+    {
+        /// <summary>
+        /// intだよー
+        /// </summary>
+        public int? NullableInt { get; set; }
+
+        /// <summary>
+        /// DateTimeだよー
+        /// </summary>
+        public DateTime? NullableDateTime { get; set; }
+
+        /// <summary>
+        /// stringだよー
+        /// </summary>
+        public string? NullableString { get; set; }
+
+        /// <summary>
+        /// Item1だよー
+        /// </summary>
+        public Item1? NullableItem1 { get; set; }
+
+        /// <summary>
+        /// int配列だよー
+        /// </summary>
+        public int[]? NullableIntArray { get; set; }
+
+        /// <summary>
+        /// intのListだよー
+        /// </summary>
+        public List<int>? NullableIntList { get; set; }
+    }
 }
