@@ -56,9 +56,16 @@ namespace MarkdownDocumentGenerator
 
             foreach (var seeTag in replaceTags)
             {
-                var spanElement = document.CreateElement("span");
-                spanElement.TextContent = seeTag.GetAttribute("cref") ?? seeTag.GetAttribute("href") ?? "";
-                seeTag.Parent!.ReplaceChild(spanElement, seeTag);
+                var seeTagValue = seeTag.GetAttribute("cref") ?? seeTag.GetAttribute("href") ?? "";
+
+                if (!string.IsNullOrEmpty(seeTagValue))
+                {
+                    seeTagValue = seeTagValue.TrimStart("T:");
+
+                    var spanElement = document.CreateElement("span");
+                    spanElement.TextContent = $"<c>{seeTagValue}</c>";
+                    seeTag.InsertBefore(spanElement);
+                }
             }
 
             var elementValue = tempTagElement.TextContent.Trim();
