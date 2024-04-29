@@ -5,11 +5,18 @@ namespace MarkdownDocumentGenerator
 {
     public record Config
     {
+        public class DebugParam
+        {
+            public string TargetClassName { get; init; } = "";
+        }
+
         public string TargetBaseClassName { get; init; } = ""; // ex. DTO.DTOBase
 
         public string ProjectPath { get; init; } = "";
 
         public string OutputMarkdownDirectory { get; init; } = "";
+
+        public DebugParam? Debug { get; init; }
 
         public static void Validate([NotNull] Config? config)
         {

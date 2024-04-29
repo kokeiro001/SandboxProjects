@@ -68,12 +68,25 @@ namespace MarkdownDocumentGenerator
                         continue;
                     }
 
-                    if (!IsInheritClass(classSymbol, config.TargetBaseClassName))
+                    // デバッグ用のパラメータが設定されている場合、任意の単一のクラス名以外はスキップする
+                    if (!string.IsNullOrEmpty(config.Debug?.TargetClassName))
                     {
-                        continue;
-                    }
+                        if (classSymbol.ToString() != config.Debug.TargetClassName)
+                        {
+                            continue;
+                        }
 
-                    Console.WriteLine($"Class {classSymbol.Name} inherits from {config.TargetBaseClassName}");
+                        Console.WriteLine($"Class {classSymbol.Name} is {config.Debug.TargetClassName}");
+                    }
+                    else
+                    {
+                        if (!IsInheritClass(classSymbol, config.TargetBaseClassName))
+                        {
+                            continue;
+                        }
+
+                        Console.WriteLine($"Class {classSymbol.Name} inherits from {config.TargetBaseClassName}");
+                    }
 
                     var classInfo = new ClassInfo(classSymbol, config);
                     classInfo.CollectProperties();
