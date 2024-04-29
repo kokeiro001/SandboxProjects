@@ -15,7 +15,7 @@
 
     /// <summary>
     /// GODプレイヤー
-    /// <see cref="CircularReferencePlayer"/>にseeするテスト。
+    /// 試しに<see cref="CircularReferencePlayer"/>にseeするテスト。
     /// </summary>
     /// <remarks>神</remarks>
     public class GodPlayer : Player
