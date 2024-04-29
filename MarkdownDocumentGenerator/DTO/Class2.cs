@@ -105,13 +105,48 @@
         public Item1? NullableItem1 { get; set; }
 
         /// <summary>
-        /// int配列だよー
+        /// int[]だよー
         /// </summary>
-        public int[]? NullableIntArray { get; set; }
+        public int[] IntArray { get; set; } = [];
+
+        /// <summary>
+        /// int[]?だよー
+        /// </summary>
+        public int[]? IntNullableArray { get; set; } = [];
+
+        /// <summary>
+        /// int?[]だよー
+        /// </summary>
+        public int?[] NullableIntArray { get; set; } = [];
+
+        /// <summary>
+        /// int[]??だよー
+        /// </summary>
+        public int?[]? NullableIntNullableArray { get; set; }
 
         /// <summary>
         /// intのListだよー
         /// </summary>
-        public List<int>? NullableIntList { get; set; }
+        public List<int> IntList { get; set; } = [];
+
+        /// <summary>
+        /// intのList?だよー
+        /// </summary>
+        public List<int>? IntNullableList { get; set; }
+
+        /// <summary>
+        /// int?のListだよー
+        /// </summary>
+        public List<int?> NullableIntList { get; set; } = [];
+
+        /// <summary>
+        /// int?のList?だよー
+        /// </summary>
+        public List<int?>? NullableIntNullableList { get; set; }
+
+        /// <summary>
+        /// int?のList?のList?だよー
+        /// </summary>
+        public List<List<int?>?>? NullableIntNullableListNullableList { get; set; }
     }
 }

@@ -31,27 +31,76 @@ namespace MarkdownDocumentGenerator
 
         private string GetTypeName()
         {
-            if (IsListType())
+            static string getTypeName(ITypeSymbol typeSymbol)
             {
-                var firstTypeArgument = ((INamedTypeSymbol)Symbol.Type).TypeArguments.First();
-                var typeName = firstTypeArgument.Name;
+                var isNullable = typeSymbol.NullableAnnotation == NullableAnnotation.Annotated;
 
-                return $"List<{typeName}>";
+                if (IsListType(typeSymbol))
+                {
+                    var firstTypeArgument = ((INamedTypeSymbol)typeSymbol).TypeArguments.First();
+
+                    var originalTypeName = getTypeName(firstTypeArgument);
+
+                    if (isNullable)
+                    {
+                        return $"List<{originalTypeName}>?";
+                    }
+                    else
+                    {
+                        return $"List<{originalTypeName}>";
+                    }
+                }
+
+                if (typeSymbol.Kind == SymbolKind.ArrayType
+                    && typeSymbol is IArrayTypeSymbol arrayTypeSymbol)
+                {
+                    var originalTypeName = getTypeName(arrayTypeSymbol.ElementType);
+
+                    if (isNullable)
+                    {
+                        return $"{originalTypeName}[]?";
+                    }
+                    else
+                    {
+                        return $"{originalTypeName}[]";
+                    }
+                }
+
+                return GetOriginalTypeName(typeSymbol);
             }
 
-            if (Symbol.Type.Kind == SymbolKind.ArrayType
-                && Symbol.Type is IArrayTypeSymbol arrayTypeSymbol)
-            {
-                return $"{arrayTypeSymbol.ElementType.Name}[]";
-            }
+            var typeName = getTypeName(Symbol.Type);
 
-            return Symbol.Type.Name;
+            return typeName;
         }
 
-        private bool IsListType()
+        private static string GetOriginalTypeName(ITypeSymbol typeSymbol)
         {
-            return Symbol.Type.OriginalDefinition.Equals(GlobalCache.ListTypeSymbol, SymbolEqualityComparer.Default)
-                   && Symbol.Type is INamedTypeSymbol namedType
+            var isNullable = typeSymbol.NullableAnnotation == NullableAnnotation.Annotated;
+
+            if (isNullable)
+            {
+                var namedTypeSymbol = (INamedTypeSymbol)typeSymbol;
+
+                var firstTypeArgument = namedTypeSymbol.TypeArguments.FirstOrDefault();
+
+                if (firstTypeArgument == null)
+                {
+                    return $"{namedTypeSymbol.Name}?";
+                }
+                else
+                {
+                    return $"{firstTypeArgument.Name}?";
+                }
+            }
+
+            return typeSymbol.Name;
+        }
+
+        private static bool IsListType(ITypeSymbol typeSymbol)
+        {
+            return typeSymbol.OriginalDefinition.Equals(GlobalCache.ListTypeSymbol, SymbolEqualityComparer.Default)
+                   && typeSymbol is INamedTypeSymbol namedType
                    && namedType.IsGenericType
                    && namedType.TypeArguments.Length == 1;
         }
