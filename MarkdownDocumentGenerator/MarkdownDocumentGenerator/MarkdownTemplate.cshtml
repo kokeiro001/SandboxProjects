@@ -17,7 +17,7 @@
 | ---: | ---- | ---- | ---- |
 @foreach (var property in @Model.Properties)
 {
-    string record = string.Join(" | ", [property.DisplayTypeName, property.DisplayName, property.Summary, property.Remarks]);
+    string record = string.Join(" | ", [$"`{property.DisplayTypeName}`", $"`{property.DisplayName}`", property.Summary, property.Remarks]);
     record = record.Replace("\n", "<br>");
     @("| " + record + " |\n")
 }
@@ -55,7 +55,7 @@
 
     @foreach (var property in associationClass.Properties)
     {
-        string record = string.Join(" | ", [property.DisplayTypeName, property.DisplayName, property.Summary, property.Remarks]);
+        string record = string.Join(" | ", [$"`{property.DisplayTypeName}`", $"`{property.DisplayName}`", property.Summary, property.Remarks]);
         record = record.Replace("\n", "<br>");
         @("| " + record + " |\n")
     }
