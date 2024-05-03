@@ -102,7 +102,7 @@
         public Item3? Item3 { get; set; }
     }
 
-    public abstract class RequestBase
+    public abstract class RequestBase : DTOBase
     {
     }
 
