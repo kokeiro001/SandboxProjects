@@ -33,9 +33,9 @@ namespace MarkdownDocumentGenerator
             using var workspace = MSBuildWorkspace.Create();
             var project = await workspace.OpenProjectAsync(config.ProjectPath);
 
-            var classInfoCollector = new ClassInfoCollector(config, project);
+            var classInfoCollector = new ClassInfoCollector(project);
 
-            var classInfos = await classInfoCollector.Collect();
+            var classInfos = await classInfoCollector.Collect(config.TargetBaseClassName);
 
             classInfos.DumpConsole();
 

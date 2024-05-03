@@ -4,9 +4,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace MarkdownDocumentGenerator
 {
-    public class ClassInfoCollector(Config config, Project project)
+    public class ClassInfoCollector(Project project)
     {
-        public async Task<ClassInfo[]> Collect()
+        public async Task<ClassInfo[]> Collect(string targetBaseClassName)
         {
             // プロジェクト内のすべてのソースコードファイルを取得
             var documents = project.Documents ?? [];
@@ -42,26 +42,14 @@ namespace MarkdownDocumentGenerator
                     }
 
                     // デバッグ用のパラメータが設定されている場合、任意の単一のクラス名以外はスキップする
-                    if (!string.IsNullOrEmpty(config.Debug?.TargetClassName))
+                    if (!IsInheritClass(classSymbol, targetBaseClassName))
                     {
-                        if (classSymbol.ToString() != config.Debug.TargetClassName)
-                        {
-                            continue;
-                        }
-
-                        Console.WriteLine($"Class {classSymbol.Name} is {config.Debug.TargetClassName}");
-                    }
-                    else
-                    {
-                        if (!IsInheritClass(classSymbol, config.TargetBaseClassName))
-                        {
-                            continue;
-                        }
-
-                        Console.WriteLine($"Class {classSymbol.Name} inherits from {config.TargetBaseClassName}");
+                        continue;
                     }
 
-                    var classInfo = new ClassInfo(classSymbol, config);
+                    Console.WriteLine($"Class {classSymbol.Name} inherits from {targetBaseClassName}");
+
+                    var classInfo = new ClassInfo(classSymbol);
                     classInfo.CollectProperties();
                     result.Add(classInfo);
                 }

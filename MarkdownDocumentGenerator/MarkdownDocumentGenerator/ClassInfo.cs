@@ -5,12 +5,10 @@ namespace MarkdownDocumentGenerator
     public class ClassInfo
     {
         private readonly DocumentationComment documentationComment;
-        private readonly Config config;
 
-        public ClassInfo(INamedTypeSymbol classSymbol, Config config)
+        public ClassInfo(INamedTypeSymbol classSymbol)
         {
             this.Symbol = classSymbol;
-            this.config = config;
 
             var docComment = classSymbol.GetDocumentationCommentXml() ?? "";
             documentationComment = new DocumentationComment(docComment);
@@ -71,7 +69,7 @@ namespace MarkdownDocumentGenerator
                 {
                     var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
 
-                    var classInfo = new ClassInfo(namedTypoeSymbol, config);
+                    var classInfo = new ClassInfo(namedTypoeSymbol);
 
                     // 循環参照を防ぐため、すでに取得済みのクラスはスキップする
                     if (associationClasses.Any(x => x.FullName == classInfo.FullName))
@@ -95,7 +93,7 @@ namespace MarkdownDocumentGenerator
 
                     foreach (var targetTypeArgument in targetTypeArguments)
                     {
-                        var argumentClassInfo = new ClassInfo(targetTypeArgument, config);
+                        var argumentClassInfo = new ClassInfo(targetTypeArgument);
                         if (associationClasses.Any(x => x.FullName == argumentClassInfo.FullName))
                         {
                             continue;
