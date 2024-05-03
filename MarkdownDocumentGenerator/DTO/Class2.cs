@@ -149,4 +149,9 @@
         /// </summary>
         public List<List<int?>?>? NullableIntNullableListNullableList { get; set; }
     }
+
+    public class DictionaryDTO : DTOBase
+    {
+        public Dictionary<int, Player> Players { get; set; }
+    }
 }

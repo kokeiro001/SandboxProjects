@@ -58,6 +58,7 @@ namespace MarkdownDocumentGenerator.Test
         [InlineData("DTO.NullableDTO", "NullableIntList", "List<int?>")]
         [InlineData("DTO.NullableDTO", "NullableIntNullableList", "List<int?>?")]
         [InlineData("DTO.NullableDTO", "NullableIntNullableListNullableList", "List<List<int?>?>?")]
+        [InlineData("DTO.DictionaryDTO", "Players", "Dictionary<int, Player>")]
         public void PropertyTypeParse(string fullClassName, string propertyDisplayName, string expectedDisplayTypeName)
         {
             var targetClassInfo = classInfoFixture.ClassInfos

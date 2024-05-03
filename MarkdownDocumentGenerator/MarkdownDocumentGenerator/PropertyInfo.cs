@@ -51,6 +51,27 @@ namespace MarkdownDocumentGenerator
                     }
                 }
 
+                if (typeSymbol is INamedTypeSymbol namedTypeSymbol
+                    && namedTypeSymbol.IsGenericType)
+                {
+                    var genericOriginalTypeName = GetOriginalTypeName(namedTypeSymbol);
+
+                    var typeNames = namedTypeSymbol.TypeArguments
+                        .Select(x => getTypeName(x))
+                        .ToArray();
+
+                    var joinedTypeNames = string.Join(", ", typeNames);
+
+                    if (isNullable)
+                    {
+                        return $"{genericOriginalTypeName}<{joinedTypeNames}>?";
+                    }
+                    else
+                    {
+                        return $"{genericOriginalTypeName}<{joinedTypeNames}>";
+                    }
+                }
+
                 if (typeSymbol.Kind == SymbolKind.ArrayType
                     && typeSymbol is IArrayTypeSymbol arrayTypeSymbol)
                 {
