@@ -41,7 +41,8 @@ namespace MarkdownDocumentGenerator
                     // 値型は基本型がNullableになるため分岐する
                     if (namedTypeSymbol.IsValueType)
                     {
-                        return GetOriginalTypeName(typeSymbol);
+                        var firstTypeArgument = namedTypeSymbol.TypeArguments.First();
+                        return $"{getTypeName(firstTypeArgument)}?";
                     }
                     else
                     {
@@ -79,35 +80,22 @@ namespace MarkdownDocumentGenerator
                     }
                 }
 
-                return GetOriginalTypeName(typeSymbol);
+
+                var typeName = GetAliasTypeNameIfExists(typeSymbol);
+
+                if (isNullable)
+                {
+                    return $"{typeName}?";
+                }
+                else
+                {
+                    return typeName;
+                }
             }
 
             var typeName = getTypeName(Symbol.Type);
 
             return typeName;
-        }
-
-        private static string GetOriginalTypeName(ITypeSymbol typeSymbol)
-        {
-            var isNullable = typeSymbol.NullableAnnotation == NullableAnnotation.Annotated;
-
-            if (isNullable)
-            {
-                var namedTypeSymbol = (INamedTypeSymbol)typeSymbol;
-
-                var firstTypeArgument = namedTypeSymbol.TypeArguments.FirstOrDefault();
-
-                if (firstTypeArgument == null)
-                {
-                    return $"{GetAliasTypeNameIfExists(namedTypeSymbol)}?";
-                }
-                else
-                {
-                    return $"{GetAliasTypeNameIfExists(firstTypeArgument)}?";
-                }
-            }
-
-            return GetAliasTypeNameIfExists(typeSymbol);
         }
 
         private static string GetAliasTypeNameIfExists(ITypeSymbol typeSymbol)
