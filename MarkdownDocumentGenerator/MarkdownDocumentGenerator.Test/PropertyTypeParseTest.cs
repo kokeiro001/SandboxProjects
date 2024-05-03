@@ -31,8 +31,8 @@ namespace MarkdownDocumentGenerator.Test
     public class PropertyTypeParseTest(ClassInfoFixture classInfoFixture) : IClassFixture<ClassInfoFixture>
     {
         [Theory]
-        [InlineData("DTO.Player", "Name", "String")]
-        [InlineData("DTO.Player", "Hp", "Int32")]
+        [InlineData("DTO.Player", "Name", "string")]
+        [InlineData("DTO.Player", "Hp", "int")]
         public void PropertyTypeParse(string fullClassName, string propertyDisplayName, string expectedDisplayTypeName)
         {
             var targetClassInfo = classInfoFixture.ClassInfos

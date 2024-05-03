@@ -86,15 +86,15 @@ namespace MarkdownDocumentGenerator
 
                 if (firstTypeArgument == null)
                 {
-                    return $"{namedTypeSymbol.Name}?";
+                    return $"{GetAliasTypeNameIfExists(namedTypeSymbol)}?";
                 }
                 else
                 {
-                    return $"{firstTypeArgument.Name}?";
+                    return $"{GetAliasTypeNameIfExists(firstTypeArgument)}?";
                 }
             }
 
-            return typeSymbol.Name;
+            return GetAliasTypeNameIfExists(typeSymbol);
         }
 
         private static bool IsListType(ITypeSymbol typeSymbol)
@@ -103,6 +103,18 @@ namespace MarkdownDocumentGenerator
                    && typeSymbol is INamedTypeSymbol namedType
                    && namedType.IsGenericType
                    && namedType.TypeArguments.Length == 1;
+        }
+
+        private static string GetAliasTypeNameIfExists(ITypeSymbol typeSymbol)
+        {
+            var typeName = typeSymbol.Name switch
+            {
+                "String" => "string",
+                "Int32" => "int",
+                _ => typeSymbol.Name,
+            };
+
+            return typeName;
         }
     }
 }
