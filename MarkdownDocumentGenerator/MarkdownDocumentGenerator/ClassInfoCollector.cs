@@ -24,10 +24,6 @@ namespace MarkdownDocumentGenerator
                     continue;
                 }
 
-                // これって使いまわしていいものなのか？
-                // 同一プロジェクト内ならセーフな気がするが、document/semanticModelごとに変わったりする？わからん。
-                GlobalCache.ListTypeSymbol ??= semanticModel.Compilation.GetTypeByMetadataName("System.Collections.Generic.List`1");
-
                 // 解析して特定のクラスを継承しているクラスの一覧を取得
                 var root = syntaxTree.GetCompilationUnitRoot();
                 var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();

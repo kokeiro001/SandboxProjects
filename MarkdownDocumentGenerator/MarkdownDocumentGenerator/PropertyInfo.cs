@@ -35,40 +35,32 @@ namespace MarkdownDocumentGenerator
             {
                 var isNullable = typeSymbol.NullableAnnotation == NullableAnnotation.Annotated;
 
-                if (IsListType(typeSymbol))
-                {
-                    var firstTypeArgument = ((INamedTypeSymbol)typeSymbol).TypeArguments.First();
-
-                    var originalTypeName = getTypeName(firstTypeArgument);
-
-                    if (isNullable)
-                    {
-                        return $"List<{originalTypeName}>?";
-                    }
-                    else
-                    {
-                        return $"List<{originalTypeName}>";
-                    }
-                }
-
                 if (typeSymbol is INamedTypeSymbol namedTypeSymbol
                     && namedTypeSymbol.IsGenericType)
                 {
-                    var genericOriginalTypeName = GetOriginalTypeName(namedTypeSymbol);
-
-                    var typeNames = namedTypeSymbol.TypeArguments
-                        .Select(x => getTypeName(x))
-                        .ToArray();
-
-                    var joinedTypeNames = string.Join(", ", typeNames);
-
-                    if (isNullable)
+                    // 値型は基本型がNullableになるため分岐する
+                    if (namedTypeSymbol.IsValueType)
                     {
-                        return $"{genericOriginalTypeName}<{joinedTypeNames}>?";
+                        return GetOriginalTypeName(typeSymbol);
                     }
                     else
                     {
-                        return $"{genericOriginalTypeName}<{joinedTypeNames}>";
+                        var genericOriginalTypeName = namedTypeSymbol.Name;
+
+                        var typeNames = namedTypeSymbol.TypeArguments
+                            .Select(x => getTypeName(x))
+                            .ToArray();
+
+                        var joinedTypeNames = string.Join(", ", typeNames);
+
+                        if (isNullable)
+                        {
+                            return $"{genericOriginalTypeName}<{joinedTypeNames}>?";
+                        }
+                        else
+                        {
+                            return $"{genericOriginalTypeName}<{joinedTypeNames}>";
+                        }
                     }
                 }
 
@@ -116,14 +108,6 @@ namespace MarkdownDocumentGenerator
             }
 
             return GetAliasTypeNameIfExists(typeSymbol);
-        }
-
-        private static bool IsListType(ITypeSymbol typeSymbol)
-        {
-            return typeSymbol.OriginalDefinition.Equals(GlobalCache.ListTypeSymbol, SymbolEqualityComparer.Default)
-                   && typeSymbol is INamedTypeSymbol namedType
-                   && namedType.IsGenericType
-                   && namedType.TypeArguments.Length == 1;
         }
 
         private static string GetAliasTypeNameIfExists(ITypeSymbol typeSymbol)

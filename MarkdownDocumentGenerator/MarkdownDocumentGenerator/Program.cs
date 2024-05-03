@@ -1,17 +1,11 @@
 ﻿using Dumpify;
 using Microsoft.Build.Locator;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Configuration;
 using RazorEngineCore;
 
 namespace MarkdownDocumentGenerator
 {
-    static class GlobalCache
-    {
-        public static INamedTypeSymbol? ListTypeSymbol { get; set; }
-    }
-
     public class Program
     {
         static async Task Main(string[] args)
