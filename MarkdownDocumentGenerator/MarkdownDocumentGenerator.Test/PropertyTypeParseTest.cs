@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.MSBuild;
 
 namespace MarkdownDocumentGenerator.Test
 {
-    public class ClassInfoFixture : IDisposable
+    public class ClassInfoFixture
     {
         public ClassInfo[] ClassInfos { get; }
 
@@ -21,10 +21,6 @@ namespace MarkdownDocumentGenerator.Test
             var classInfoCollector = new ClassInfoCollector(project);
 
             ClassInfos = classInfoCollector.Collect("DTO.DTOBase").Result;
-        }
-
-        public void Dispose()
-        {
         }
     }
 

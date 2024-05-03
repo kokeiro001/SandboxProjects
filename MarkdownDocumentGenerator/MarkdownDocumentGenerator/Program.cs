@@ -8,7 +8,7 @@ namespace MarkdownDocumentGenerator
 {
     public class Program
     {
-        static async Task Main(string[] args)
+        static async Task Main()
         {
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
