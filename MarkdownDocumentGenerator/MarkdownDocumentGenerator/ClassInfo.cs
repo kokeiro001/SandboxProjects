@@ -18,6 +18,7 @@ namespace MarkdownDocumentGenerator
         {
             return FullName;
         }
+
         public INamedTypeSymbol Symbol { get; }
 
         public string DisplayName => Symbol.Name;
@@ -28,19 +29,21 @@ namespace MarkdownDocumentGenerator
 
         public string Remarks => documentationComment.GetRemarks();
 
-        public List<PropertyInfo> Properties { get; set; } = [];
+        public IReadOnlyList<PropertyInfo> Properties => properties;
+        private readonly List<PropertyInfo> properties = [];
 
         public string FullName => string.IsNullOrEmpty(Namespace) ? DisplayName : $"{Namespace}.{DisplayName}";
 
-        public List<ClassInfo> AssociationClasses { get; set; } = [];
+        public IReadOnlyList<ClassInfo> AssociationClasses => associationClasses;
+        private readonly List<ClassInfo> associationClasses = [];
 
         public void CollectProperties(int maxDepth)
         {
             // 再帰的に呼び出すため
-            InternalCollectProperties(Symbol, AssociationClasses, 0, maxDepth);
+            InternalCollectProperties(Symbol, 0, maxDepth);
         }
 
-        private void InternalCollectProperties(INamedTypeSymbol baseSymbol, List<ClassInfo> associationClasses, int currentDepth, int maxDepth)
+        private void InternalCollectProperties(INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
         {
             if (currentDepth > maxDepth)
             {
@@ -56,14 +59,14 @@ namespace MarkdownDocumentGenerator
                 {
                     var propertyInfo = new PropertyInfo(propertySymbol);
 
-                    Properties.Add(propertyInfo);
+                    properties.Add(propertyInfo);
                 }
 
                 currentSymbol = currentSymbol.BaseType;
             }
 
             // プロパティとして取得した型がクラスか構造体の場合、関連クラスとして追加する
-            foreach (var propertyInfo in Properties)
+            foreach (var propertyInfo in properties)
             {
                 //  TODO: 構造体の場合も同様の処理でいける？ or TypeKind.Struct でいける？
                 if (propertyInfo.Symbol.Type.TypeKind is TypeKind.Class)
@@ -83,7 +86,7 @@ namespace MarkdownDocumentGenerator
                     {
                         // この型を直接情報として追加する
                         associationClasses.Add(classInfo);
-                        classInfo.InternalCollectProperties(classInfo.Symbol, associationClasses, currentDepth + 1, maxDepth);
+                        classInfo.InternalCollectProperties(classInfo.Symbol, currentDepth + 1, maxDepth);
                     }
 
                     // List<T>とかジェネリックの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
@@ -101,13 +104,13 @@ namespace MarkdownDocumentGenerator
                         }
 
                         associationClasses.Add(argumentClassInfo);
-                        argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, associationClasses, currentDepth + 1, maxDepth);
+                        argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, currentDepth + 1, maxDepth);
                     }
                 }
             }
 
             // TODO: プロパティとして取得した形がenumの場合、enumの値を取得する
-            foreach (var propertyInfo in Properties)
+            foreach (var propertyInfo in properties)
             {
                 if (propertyInfo.Symbol.Type.TypeKind == TypeKind.Enum)
                 {
