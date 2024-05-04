@@ -47,9 +47,26 @@ namespace MarkdownDocumentGenerator
             var razorEngine = new RazorEngine();
             var template = razorEngine.Compile(markdownTemplate);
 
-            var result = await template.RunAsync(classInfo);
+            var renderMarkdownModel = new RenderMarkdownModel(classInfo)
+            {
+                RenderProjectGitBranch = "dummy branch",
+                RenderProjectGitCommitHash = "dummy commit hash",
+            };
+
+            var result = await template.RunAsync(renderMarkdownModel);
             await File.WriteAllTextAsync(outputMarkdownFilepath, result);
             Console.WriteLine(result);
+        }
+
+        public class RenderMarkdownModel(ClassInfo classInfo)
+        {
+            public ClassInfo ClassInfo { get; } = classInfo;
+
+            public DateTime RenderDateTime { get; init; } = DateTime.Now;
+
+            public string RenderProjectGitBranch { get; init; } = "";
+
+            public string RenderProjectGitCommitHash { get; init; } = "";
         }
     }
 }

@@ -1,34 +1,34 @@
-﻿# @Model.DisplayName
+﻿# @Model.ClassInfo.DisplayName
 
 ## 概要
 
-@Model.Summary.Replace("\n", "<br>")
+@Model.ClassInfo.Summary.Replace("\n", "<br>")
 
-@if (!string.IsNullOrEmpty(Model.Remarks))
+@if (!string.IsNullOrEmpty(Model.ClassInfo.Remarks))
 {
     @("### 備考\n")
     @("\n")
-    @(@Model.Remarks + "\n")
+    @(@Model.ClassInfo.Remarks + "\n")
 }
 
 ## プロパティ
 
 | 型名 | 名前 | 説明 | 備考 |
 | ---: | ---- | ---- | ---- |
-@foreach (var property in @Model.Properties)
+@foreach (var property in @Model.ClassInfo.Properties)
 {
     string record = string.Join(" | ", [$"`{property.DisplayTypeName}`", $"`{property.DisplayName}`", property.Summary, property.Remarks]);
     record = record.Replace("\n", "<br>");
     @("| " + record + " |\n")
 }
 
-@if (@Model.AssociationClasses.Count > 0)
+@if (@Model.ClassInfo.AssociationClasses.Count > 0)
 {
     @("---\n\n")
 
     @("## 関連クラス\n\n")
 
-    @foreach (var associationClass in @Model.AssociationClasses)
+    @foreach (var associationClass in @Model.ClassInfo.AssociationClasses)
     {
         @($"### {associationClass.DisplayName}\n")
         @("\n")
@@ -59,18 +59,23 @@
             @("| " + record + " |\n")
         }
 
-        @("\n")
-        @("---\n\n")
+        var isLast = Model.ClassInfo.AssociationClasses[Model.ClassInfo.AssociationClasses.Count - 1] == associationClass;
+
+        @if(!isLast)
+        {
+            @("\n")
+            @("---\n\n")
+        }
     }
 }
 
-@if (@Model.AssociationEnums.Count > 0)
+@if (@Model.ClassInfo.AssociationEnums.Count > 0)
 {
     @("---\n\n")
 
     @("## 関連Enum\n\n")
 
-    @foreach (var associationEnum in @Model.AssociationEnums)
+    @foreach (var associationEnum in @Model.ClassInfo.AssociationEnums)
     {
         @($"### {associationEnum.DisplayName}\n")
         @("\n")
@@ -101,7 +106,22 @@
             @("| " + record + " |\n")
         }
 
-        @("\n")
-        @("---\n\n")
+        var isLast = Model.ClassInfo.AssociationEnums[Model.ClassInfo.AssociationEnums.Count - 1] == associationEnum;
+
+        @if(!isLast)
+        {
+            @("\n")
+            @("---\n\n")
+        }
     }
 }
+
+@("\n---\n\n")
+
+## ドキュメント生成時情報
+
+| 名前 | 値 |
+| ---: | ---- |
+| 生成日時 | @Model.RenderDateTime |
+| gitブランチ名 | @Model.RenderProjectGitBranch |
+| git最終コミットhash | @Model.RenderProjectGitCommitHash |
