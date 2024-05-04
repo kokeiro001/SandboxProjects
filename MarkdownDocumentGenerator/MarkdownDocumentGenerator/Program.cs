@@ -1,4 +1,4 @@
-﻿using Dumpify;
+﻿using LibGit2Sharp;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Configuration;
@@ -31,42 +31,61 @@ namespace MarkdownDocumentGenerator
 
             var classInfos = await classInfoCollector.Collect(config.TargetBaseClassName);
 
-            classInfos.DumpConsole();
+            //classInfos.DumpConsole();
+
+            var repositoryPath = Repository.Discover(Path.GetDirectoryName(config.ProjectPath));
 
             foreach (var classInfo in classInfos)
             {
-                await RenderMarkdown(classInfo, config.OutputMarkdownDirectory);
+                var gitRepositoryInfo = GetRepositoryInfo(repositoryPath);
+
+                var renderMarkdownModel = new RenderMarkdownModel(classInfo)
+                {
+                    RenderProjectGitBranch = gitRepositoryInfo.branch,
+                    RenderProjectGitCommitHash = gitRepositoryInfo.lastCommitHash,
+                };
+
+                var outputMarkdownFilepath = Path.Combine(config.OutputMarkdownDirectory, $"{classInfo.DisplayName}.md");
+
+                await RenderMarkdown(renderMarkdownModel, outputMarkdownFilepath);
             }
         }
 
-        static async Task RenderMarkdown(ClassInfo classInfo, string outputMarkdownDirectory)
+        static async Task RenderMarkdown(
+            RenderMarkdownModel renderMarkdownModel,
+            string outputMarkdownFilepath)
         {
-            var outputMarkdownFilepath = Path.Combine(outputMarkdownDirectory, $"{classInfo.DisplayName}.md");
-
             var markdownTemplate = await File.ReadAllTextAsync("MarkdownTemplate.cshtml");
             var razorEngine = new RazorEngine();
             var template = razorEngine.Compile(markdownTemplate);
 
-            var renderMarkdownModel = new RenderMarkdownModel(classInfo)
-            {
-                RenderProjectGitBranch = "dummy branch",
-                RenderProjectGitCommitHash = "dummy commit hash",
-            };
-
             var result = await template.RunAsync(renderMarkdownModel);
             await File.WriteAllTextAsync(outputMarkdownFilepath, result);
-            Console.WriteLine(result);
+
+            Console.WriteLine($"Finish RenderMarkdown {renderMarkdownModel.ClassInfo.DisplayName}");
         }
 
         public class RenderMarkdownModel(ClassInfo classInfo)
         {
             public ClassInfo ClassInfo { get; } = classInfo;
 
-            public DateTime RenderDateTime { get; init; } = DateTime.Now;
+            public DateTimeOffset RenderDateTime { get; init; } = DateTimeOffset.Now;
 
             public string RenderProjectGitBranch { get; init; } = "";
 
             public string RenderProjectGitCommitHash { get; init; } = "";
+        }
+
+        private static (string branch, string lastCommitHash) GetRepositoryInfo(string repositoryPath)
+        {
+            using var repo = new Repository(repositoryPath);
+            // 現在のブランチ名を取得
+            var currentBranch = repo.Head.FriendlyName;
+
+            // 最新のコミットを取得
+            Commit latestCommit = repo.Head.Tip;
+
+            return (currentBranch, latestCommit.Sha);
         }
     }
 }
