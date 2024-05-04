@@ -34,14 +34,15 @@ namespace MarkdownDocumentGenerator
 
         public List<ClassInfo> AssociationClasses { get; set; } = [];
 
-        public void CollectProperties()
+        public void CollectProperties(int maxDepth)
         {
-            InternalCollectProperties(Symbol, AssociationClasses, 0);
+            // 再帰的に呼び出すため
+            InternalCollectProperties(Symbol, AssociationClasses, 0, maxDepth);
         }
 
-        private void InternalCollectProperties(INamedTypeSymbol baseSymbol, List<ClassInfo> associationClasses, int depth)
+        private void InternalCollectProperties(INamedTypeSymbol baseSymbol, List<ClassInfo> associationClasses, int currentDepth, int maxDepth)
         {
-            if (depth > 3)
+            if (currentDepth > maxDepth)
             {
                 return;
             }
@@ -82,7 +83,7 @@ namespace MarkdownDocumentGenerator
                     {
                         // この型を直接情報として追加する
                         associationClasses.Add(classInfo);
-                        classInfo.InternalCollectProperties(classInfo.Symbol, associationClasses, depth + 1);
+                        classInfo.InternalCollectProperties(classInfo.Symbol, associationClasses, currentDepth + 1, maxDepth);
                     }
 
                     // List<T>とかジェネリックの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
@@ -100,7 +101,7 @@ namespace MarkdownDocumentGenerator
                         }
 
                         associationClasses.Add(argumentClassInfo);
-                        argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, associationClasses, depth + 1);
+                        argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, associationClasses, currentDepth + 1, maxDepth);
                     }
                 }
             }

@@ -6,7 +6,7 @@ namespace MarkdownDocumentGenerator
 {
     public class ClassInfoCollector(Project project)
     {
-        public async Task<ClassInfo[]> Collect(string targetBaseClassName)
+        public async Task<ClassInfo[]> Collect(string targetBaseClassName, int maxPropertyTypeCollectDepth = 3)
         {
             // プロジェクト内のすべてのソースコードファイルを取得
             var documents = project.Documents ?? [];
@@ -46,7 +46,7 @@ namespace MarkdownDocumentGenerator
                     Console.WriteLine($"Class {classSymbol.Name} inherits from {targetBaseClassName}");
 
                     var classInfo = new ClassInfo(classSymbol);
-                    classInfo.CollectProperties();
+                    classInfo.CollectProperties(maxPropertyTypeCollectDepth);
                     result.Add(classInfo);
                 }
             }
