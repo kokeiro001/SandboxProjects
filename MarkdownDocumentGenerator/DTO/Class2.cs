@@ -152,6 +152,32 @@
 
     public class DictionaryDTO : DTOBase
     {
-        public Dictionary<int, Player> Players { get; set; }
+        public Dictionary<int, Player> Players { get; set; } = [];
+    }
+
+    /// <summary>
+    /// アルファベット列挙してるよー
+    /// </summary>
+    public enum AlphabetEnum
+    {
+        /// <summary>Aだよー</summary>
+        A,
+
+        /// <summary>Bだよー</summary>
+        B,
+
+        /// <summary>Cだよー</summary>
+        C,
+    }
+
+    /// <summary>
+    /// Enumの検証用DTO
+    /// </summary>
+    public class EnumDTO : DTOBase
+    {
+        /// <summary>
+        /// お気に入りのアルファベット
+        /// </summary>
+        public AlphabetEnum FavoriteAlpabet { get; set; }
     }
 }
