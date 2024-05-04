@@ -8,8 +8,19 @@
     /// </remarks>
     public enum MoveType
     {
+        /// <summary>
+        /// 動きなし
+        /// </summary>
         None,
+
+        /// <summary>
+        /// 歩く
+        /// </summary>
         Walk,
+
+        /// <summary>
+        /// 走る
+        /// </summary>
         Run,
     }
 
