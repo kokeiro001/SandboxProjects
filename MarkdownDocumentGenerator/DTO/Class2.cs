@@ -158,6 +158,9 @@
     /// <summary>
     /// アルファベット列挙してるよー
     /// </summary>
+    /// <remarks>
+    /// 全部列挙するのは面倒だから3つだけだよー
+    /// </remarks>
     public enum AlphabetEnum
     {
         /// <summary>Aだよー</summary>

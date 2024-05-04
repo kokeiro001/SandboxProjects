@@ -24,7 +24,7 @@
 
 @if (@Model.AssociationClasses.Count > 0)
 {
-    @("---\n")
+    @("---\n\n")
 
     @("## 関連クラス\n\n")
 
@@ -55,6 +55,48 @@
         @foreach (var property in associationClass.Properties)
         {
             string record = string.Join(" | ", [$"`{property.DisplayTypeName}`", $"`{property.DisplayName}`", property.Summary, property.Remarks]);
+            record = record.Replace("\n", "<br>");
+            @("| " + record + " |\n")
+        }
+
+        @("\n")
+        @("---\n\n")
+    }
+}
+
+@if (@Model.AssociationEnums.Count > 0)
+{
+    @("---\n\n")
+
+    @("## 関連Enum\n\n")
+
+    @foreach (var associationEnum in @Model.AssociationEnums)
+    {
+        @($"### {associationEnum.DisplayName}\n")
+        @("\n")
+
+        @("### 概要\n")
+        @("\n")
+        @($"{associationEnum.Summary}\n")
+        @("\n")
+
+        @if (!string.IsNullOrEmpty(associationEnum.Remarks))
+        {
+            @("#### 備考\n")
+            @("\n")
+            @($"{associationEnum.Remarks}\n")
+            @("\n")
+        }
+
+        @("### 値\n")
+        @("\n")
+
+        @("| 名前 | 値 | 説明 | 備考 |\n")
+        @("| ---: | -- | ---- | ---- |\n")
+
+        @foreach (var enumValue in associationEnum.Values)
+        {
+            string record = string.Join(" | ", [$"`{enumValue.DisplayName}`", $"`{enumValue.Value}`", enumValue.Summary, enumValue.Remarks]);
             record = record.Replace("\n", "<br>");
             @("| " + record + " |\n")
         }
