@@ -209,4 +209,41 @@
         /// </summary>
         public NumberEnum FavoriteNumber { get; set; }
     }
+
+    /// <summary>
+    /// プロパティとしてもたせる検証用構造体
+    /// </summary>
+    public struct InnerStruct
+    {
+        /// <summary>
+        /// 適当な値
+        /// </summary>
+        public int Value { get; set; }
+
+        /// <summary>
+        /// 適当な名前
+        /// </summary>
+        public string Name { get; set; }
+    }
+
+    /// <summary>
+    /// Structをパースできるか検証だよー
+    /// </summary>
+    public class HasStrutDTO : DTOBase
+    {
+        /// <summary>
+        /// 構造体持たせてみるよー
+        /// </summary>
+        public InnerStruct InnerStruct { get; set; }
+
+        /// <summary>
+        /// 構造体のnullable持たせてみるよー
+        /// </summary>
+        public InnerStruct? NullableInnerStruct { get; set; }
+
+        /// <summary>
+        /// 構造体をListで持たせてみるよー
+        /// </summary>
+        public List<InnerStruct> InnerStructList { get; set; } = [];
+    }
 }

@@ -72,7 +72,7 @@ namespace MarkdownDocumentGenerator
             foreach (var propertyInfo in properties)
             {
                 //  TODO: 構造体の場合も同様の処理でいける？ or TypeKind.Struct でいける？
-                if (propertyInfo.Symbol.Type.TypeKind is TypeKind.Class)
+                if (propertyInfo.Symbol.Type.TypeKind is TypeKind.Class or TypeKind.Struct)
                 {
                     var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
 
@@ -112,7 +112,7 @@ namespace MarkdownDocumentGenerator
                 }
             }
 
-            // TODO: プロパティとして取得した形がenumの場合、enumの値を取得する
+            // プロパティとして取得した形がenumの場合、enumの値を取得する
             foreach (var propertyInfo in properties)
             {
                 if (propertyInfo.Symbol.Type.TypeKind == TypeKind.Enum)
