@@ -8,7 +8,7 @@ namespace MarkdownDocumentGenerator
 
         public ClassInfo(INamedTypeSymbol classSymbol)
         {
-            this.Symbol = classSymbol;
+            Symbol = classSymbol;
 
             var docComment = classSymbol.GetDocumentationCommentXml() ?? "";
             documentationComment = new DocumentationComment(docComment);
@@ -37,9 +37,12 @@ namespace MarkdownDocumentGenerator
         public IReadOnlyList<ClassInfo> AssociationClasses => associationClasses;
         private readonly List<ClassInfo> associationClasses = [];
 
+        public IReadOnlyList<EnumInfo> AssociationEnums => associationEnums;
+        private readonly List<EnumInfo> associationEnums = [];
+
         public void CollectProperties(int maxDepth)
         {
-            // 再帰的に呼び出すため
+            // 再帰的に呼び出す
             InternalCollectProperties(Symbol, 0, maxDepth);
         }
 
@@ -114,7 +117,22 @@ namespace MarkdownDocumentGenerator
             {
                 if (propertyInfo.Symbol.Type.TypeKind == TypeKind.Enum)
                 {
-                    // implement
+                    var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
+
+                    var enumInfo = new EnumInfo(namedTypoeSymbol);
+
+                    // 循環参照を防ぐため、すでに取得済みのenumはスキップする
+                    if (associationEnums.Any(x => x.FullName == enumInfo.FullName))
+                    {
+                        continue;
+                    }
+
+                    // 同一アセンブリで定義されている独自のenumのみ対象とする
+                    if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyInfo.Symbol.Type.ContainingAssembly))
+                    {
+                        // この型を直接情報として追加する
+                        associationEnums.Add(enumInfo);
+                    }
                 }
             }
         }
