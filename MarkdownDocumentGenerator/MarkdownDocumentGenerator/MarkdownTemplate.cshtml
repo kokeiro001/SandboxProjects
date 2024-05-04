@@ -10,7 +10,6 @@
     @("\n")
     @(@Model.ClassInfo.Remarks + "\n")
 }
-
 ## プロパティ
 
 | 型名 | 名前 | 説明 | 備考 |
@@ -26,7 +25,7 @@
 {
     @("---\n\n")
 
-    @("## 関連クラス\n\n")
+    @("## 関連クラス/構造体\n\n")
 
     @foreach (var associationClass in @Model.ClassInfo.AssociationClasses)
     {
@@ -115,7 +114,6 @@
         }
     }
 }
-
 ---
 
 ## ドキュメント生成時情報
