@@ -174,6 +174,27 @@
     }
 
     /// <summary>
+    /// 数字列挙してるよー
+    /// </summary>
+    /// <remarks>
+    /// ちょこっとだけ列挙だよー
+    /// </remarks>
+    public enum NumberEnum
+    {
+        /// <summary>1だよー</summary>
+        /// <remarks>おね</remarks>
+        One,
+
+        /// <summary>2だよー</summary>
+        /// <remarks>とぉ</remarks>
+        Two,
+
+        /// <summary>3だよー</summary>
+        /// <remarks>ｔｈれえ</remarks>
+        Three,
+    }
+
+    /// <summary>
     /// Enumの検証用DTO
     /// </summary>
     public class EnumDTO : DTOBase
@@ -182,5 +203,10 @@
         /// お気に入りのアルファベット
         /// </summary>
         public AlphabetEnum FavoriteAlpabet { get; set; }
+
+        /// <summary>
+        /// お気に入りの数字
+        /// </summary>
+        public NumberEnum FavoriteNumber { get; set; }
     }
 }
