@@ -15,7 +15,8 @@ namespace MarkdownDocumentGenerator.Test
                     "DTO.EnumDTO",
                     new ExpectedAssociationEnum[]
                     {
-                        new("AlphabetEnum", "FavoriteAlpabet")
+                        new("AlphabetEnum", "FavoriteAlpabet"),
+                        new("NumberEnum", "FavoriteNumber"),
                     }
                 };
             }
