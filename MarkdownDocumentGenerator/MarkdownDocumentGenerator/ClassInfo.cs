@@ -73,41 +73,7 @@ namespace MarkdownDocumentGenerator
             {
                 if (propertyInfo.Symbol.Type.TypeKind is TypeKind.Class or TypeKind.Struct)
                 {
-                    var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
-
-                    var classInfo = new ClassInfo(namedTypoeSymbol);
-
-                    // 循環参照を防ぐため、すでに取得済みのクラスはスキップする
-                    if (associationClasses.Any(x => x.FullName == classInfo.FullName))
-                    {
-                        continue;
-                    }
-
-                    // 同一アセンブリで定義されている独自のクラスのみ対象とする
-                    if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyInfo.Symbol.Type.ContainingAssembly))
-                    {
-                        // この型を直接情報として追加する
-                        associationClasses.Add(classInfo);
-                        classInfo.InternalCollectProperties(classInfo.Symbol, currentDepth + 1, maxDepth);
-                    }
-
-                    // List<T>とかジェネリックの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
-                    var targetTypeArguments = namedTypoeSymbol.TypeArguments.OfType<INamedTypeSymbol>()
-                        .Where(x => x.TypeKind is TypeKind.Class)
-                        .Where(x => AreContainingSameAssembly(baseSymbol.ContainingAssembly, x.ContainingAssembly))
-                        .ToArray();
-
-                    foreach (var targetTypeArgument in targetTypeArguments)
-                    {
-                        var argumentClassInfo = new ClassInfo(targetTypeArgument);
-                        if (associationClasses.Any(x => x.FullName == argumentClassInfo.FullName))
-                        {
-                            continue;
-                        }
-
-                        associationClasses.Add(argumentClassInfo);
-                        argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, currentDepth + 1, maxDepth);
-                    }
+                    HandleClassOrStruct(propertyInfo, baseSymbol, currentDepth, maxDepth);
                 }
 
                 // プロパティとして取得した形がenumの場合、enumの値を取得する
@@ -130,6 +96,45 @@ namespace MarkdownDocumentGenerator
                         associationEnums.Add(enumInfo);
                     }
                 }
+            }
+        }
+
+        private void HandleClassOrStruct(PropertyInfo propertyInfo, INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
+        {
+            var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
+
+            var classInfo = new ClassInfo(namedTypoeSymbol);
+
+            // 循環参照を防ぐため、すでに取得済みのクラスはスキップする
+            if (associationClasses.Any(x => x.FullName == classInfo.FullName))
+            {
+                return;
+            }
+
+            // 同一アセンブリで定義されている独自のクラスのみ対象とする
+            if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyInfo.Symbol.Type.ContainingAssembly))
+            {
+                // この型を直接情報として追加する
+                associationClasses.Add(classInfo);
+                classInfo.InternalCollectProperties(classInfo.Symbol, currentDepth + 1, maxDepth);
+            }
+
+            // List<T>とかジェネリックの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
+            var targetTypeArguments = namedTypoeSymbol.TypeArguments.OfType<INamedTypeSymbol>()
+                .Where(x => x.TypeKind is TypeKind.Class)
+                .Where(x => AreContainingSameAssembly(baseSymbol.ContainingAssembly, x.ContainingAssembly))
+                .ToArray();
+
+            foreach (var targetTypeArgument in targetTypeArguments)
+            {
+                var argumentClassInfo = new ClassInfo(targetTypeArgument);
+                if (associationClasses.Any(x => x.FullName == argumentClassInfo.FullName))
+                {
+                    continue;
+                }
+
+                associationClasses.Add(argumentClassInfo);
+                argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, currentDepth + 1, maxDepth);
             }
         }
 
