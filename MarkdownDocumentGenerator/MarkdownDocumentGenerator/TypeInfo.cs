@@ -101,9 +101,8 @@ namespace MarkdownDocumentGenerator
         private void HandleArray(ITypeSymbol propertyTypeSymbol, INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
         {
             var arrayTypeSymbol = (IArrayTypeSymbol)propertyTypeSymbol;
-            var elementTypeSymbol = (INamedTypeSymbol)arrayTypeSymbol.ElementType;
 
-            HandleSymbolByTypeKind(elementTypeSymbol, baseSymbol, currentDepth, maxDepth);
+            HandleSymbolByTypeKind(arrayTypeSymbol.ElementType, baseSymbol, currentDepth, maxDepth);
         }
 
         private void HandleClassOrStruct(ITypeSymbol propertyTypeSymbol, INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
@@ -112,7 +111,7 @@ namespace MarkdownDocumentGenerator
 
             var typeInfo = new TypeInfo(namedTypeSymbol);
 
-            // 循環参照を防ぐため、すでに取得済みのクラスはスキップする
+            // すでに取得済みのクラスはスキップする
             if (associationTypes.Any(x => x.FullName == typeInfo.FullName))
             {
                 return;
@@ -143,18 +142,19 @@ namespace MarkdownDocumentGenerator
 
             var enumInfo = new EnumInfo(namedTypeSymbol);
 
-            // 循環参照を防ぐため、すでに取得済みのenumはスキップする
+            // すでに取得済みのenumはスキップする
             if (associationEnums.Any(x => x.FullName == enumInfo.FullName))
             {
                 return;
             }
 
             // 同一アセンブリで定義されている独自のenumのみ対象とする
-            if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyTypeSymbol.ContainingAssembly))
+            if (!AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyTypeSymbol.ContainingAssembly))
             {
-                // この型を直接情報として追加する
-                associationEnums.Add(enumInfo);
+                return;
             }
+
+            associationEnums.Add(enumInfo);
         }
 
         private static bool AreContainingSameAssembly(IAssemblySymbol left, IAssemblySymbol right)
