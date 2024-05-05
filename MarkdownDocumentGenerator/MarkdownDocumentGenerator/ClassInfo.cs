@@ -71,15 +71,18 @@ namespace MarkdownDocumentGenerator
             // プロパティとして取得した型がクラスか構造体の場合、関連クラスとして追加する
             foreach (var propertyInfo in properties)
             {
-                if (propertyInfo.Symbol.Type.TypeKind is TypeKind.Class or TypeKind.Struct)
+                switch (propertyInfo.Symbol.Type.TypeKind)
                 {
-                    HandleClassOrStruct(propertyInfo, baseSymbol, currentDepth, maxDepth);
-                }
-
-                // プロパティとして取得した形がenumの場合、enumの値を取得する
-                if (propertyInfo.Symbol.Type.TypeKind == TypeKind.Enum)
-                {
-                    HandleEnum(baseSymbol, propertyInfo);
+                    case TypeKind.Array:
+                        // TODO
+                        break;
+                    case TypeKind.Class:
+                    case TypeKind.Struct:
+                        HandleClassOrStruct(propertyInfo, baseSymbol, currentDepth, maxDepth);
+                        break;
+                    case TypeKind.Enum:
+                        HandleEnum(baseSymbol, propertyInfo);
+                        break;
                 }
             }
         }
