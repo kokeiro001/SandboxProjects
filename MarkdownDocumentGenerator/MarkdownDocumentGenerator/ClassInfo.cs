@@ -99,9 +99,9 @@ namespace MarkdownDocumentGenerator
 
         private void HandleClassOrStruct(ITypeSymbol propertyTypeSymbol, INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
         {
-            var namedTypoeSymbol = (INamedTypeSymbol)propertyTypeSymbol;
+            var namedTypeSymbol = (INamedTypeSymbol)propertyTypeSymbol;
 
-            var classInfo = new ClassInfo(namedTypoeSymbol);
+            var classInfo = new ClassInfo(namedTypeSymbol);
 
             // 循環参照を防ぐため、すでに取得済みのクラスはスキップする
             if (associationClasses.Any(x => x.FullName == classInfo.FullName))
@@ -118,7 +118,7 @@ namespace MarkdownDocumentGenerator
             }
 
             // List<T>とかジェネリックの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
-            var targetTypeArguments = namedTypoeSymbol.TypeArguments.OfType<INamedTypeSymbol>()
+            var targetTypeArguments = namedTypeSymbol.TypeArguments.OfType<INamedTypeSymbol>()
                 .Where(x => x.TypeKind is TypeKind.Class)
                 .Where(x => AreContainingSameAssembly(baseSymbol.ContainingAssembly, x.ContainingAssembly))
                 .ToArray();
@@ -138,9 +138,9 @@ namespace MarkdownDocumentGenerator
 
         private void HandleEnum(INamedTypeSymbol baseSymbol, PropertyInfo propertyInfo)
         {
-            var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
+            var namedTypeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
 
-            var enumInfo = new EnumInfo(namedTypoeSymbol);
+            var enumInfo = new EnumInfo(namedTypeSymbol);
 
             // 循環参照を防ぐため、すでに取得済みのenumはスキップする
             if (associationEnums.Any(x => x.FullName == enumInfo.FullName))
