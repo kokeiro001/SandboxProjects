@@ -7,9 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownDocumentGenerator",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DTO", "DTO\DTO.csproj", "{B1328A64-0513-45A3-A3FC-BDEDFFFFA615}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownDocumentGeneratorByBuildalyzer", "MarkdownDocumentGeneratorByBuildalyzer\MarkdownDocumentGeneratorByBuildalyzer.csproj", "{254A2951-6580-4194-A5DC-020A60BD32B2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkdownDocumentGenerator.Test", "MarkdownDocumentGenerator.Test\MarkdownDocumentGenerator.Test.csproj", "{AFBD4209-062C-4113-9D7E-C034049DA72A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownDocumentGenerator.Test", "MarkdownDocumentGenerator.Test\MarkdownDocumentGenerator.Test.csproj", "{AFBD4209-062C-4113-9D7E-C034049DA72A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +23,6 @@ Global
 		{B1328A64-0513-45A3-A3FC-BDEDFFFFA615}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1328A64-0513-45A3-A3FC-BDEDFFFFA615}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1328A64-0513-45A3-A3FC-BDEDFFFFA615}.Release|Any CPU.Build.0 = Release|Any CPU
-		{254A2951-6580-4194-A5DC-020A60BD32B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{254A2951-6580-4194-A5DC-020A60BD32B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{254A2951-6580-4194-A5DC-020A60BD32B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{254A2951-6580-4194-A5DC-020A60BD32B2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AFBD4209-062C-4113-9D7E-C034049DA72A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AFBD4209-062C-4113-9D7E-C034049DA72A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFBD4209-062C-4113-9D7E-C034049DA72A}.Release|Any CPU.ActiveCfg = Release|Any CPU
