@@ -257,4 +257,20 @@
         /// </summary>
         public List<InnerStruct> InnerStructList { get; set; } = [];
     }
+
+    /// <summary>
+    /// Listの関連クラスを認識できるかの検証用DTO
+    /// </summary>
+    public class ListAssociationDTO : DTOBase
+    {
+        public List<Player> Players { get; set; } = [];
+    }
+
+    /// <summary>
+    /// Arrayの関連クラスを認識できるかの検証用DTO
+    /// </summary>
+    public class ArrayAssociationDTO : DTOBase
+    {
+        public Player[] Players { get; set; } = [];
+    }
 }

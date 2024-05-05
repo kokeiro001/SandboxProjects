@@ -74,11 +74,11 @@ namespace MarkdownDocumentGenerator
                 switch (propertyInfo.Symbol.Type.TypeKind)
                 {
                     case TypeKind.Array:
-                        // TODO
+                        HandleArray(propertyInfo.Symbol.Type, baseSymbol, currentDepth, maxDepth);
                         break;
                     case TypeKind.Class:
                     case TypeKind.Struct:
-                        HandleClassOrStruct(propertyInfo, baseSymbol, currentDepth, maxDepth);
+                        HandleClassOrStruct(propertyInfo.Symbol.Type, baseSymbol, currentDepth, maxDepth);
                         break;
                     case TypeKind.Enum:
                         HandleEnum(baseSymbol, propertyInfo);
@@ -87,9 +87,19 @@ namespace MarkdownDocumentGenerator
             }
         }
 
-        private void HandleClassOrStruct(PropertyInfo propertyInfo, INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
+        private void HandleArray(ITypeSymbol propertyTypeSymbol, INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
         {
-            var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
+            var arrayTypeSymbol = (IArrayTypeSymbol)propertyTypeSymbol;
+            var propertyNamedTypeSymbol = (INamedTypeSymbol)arrayTypeSymbol.ElementType;
+
+            HandleClassOrStruct(propertyNamedTypeSymbol, baseSymbol, currentDepth, maxDepth);
+
+            // FIXME: Enumの場合にうまく動かないので修正する
+        }
+
+        private void HandleClassOrStruct(ITypeSymbol propertyTypeSymbol, INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
+        {
+            var namedTypoeSymbol = (INamedTypeSymbol)propertyTypeSymbol;
 
             var classInfo = new ClassInfo(namedTypoeSymbol);
 
@@ -100,7 +110,7 @@ namespace MarkdownDocumentGenerator
             }
 
             // 同一アセンブリで定義されている独自のクラスのみ対象とする
-            if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyInfo.Symbol.Type.ContainingAssembly))
+            if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyTypeSymbol.ContainingAssembly))
             {
                 // この型を直接情報として追加する
                 associationClasses.Add(classInfo);
