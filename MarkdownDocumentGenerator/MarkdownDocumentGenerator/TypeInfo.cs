@@ -2,11 +2,11 @@
 
 namespace MarkdownDocumentGenerator
 {
-    public class ClassInfo
+    public class TypeInfo
     {
         private readonly DocumentationComment documentationComment;
 
-        public ClassInfo(INamedTypeSymbol classSymbol)
+        public TypeInfo(INamedTypeSymbol classSymbol)
         {
             Symbol = classSymbol;
 
@@ -40,8 +40,8 @@ namespace MarkdownDocumentGenerator
         /// <remarks>
         /// Typeって名前だと解釈できる範囲が広すぎるので本当は狭めたいがいい名前がわからない。
         /// </remarks>
-        public IReadOnlyList<ClassInfo> AssociationTypes => associationTypes;
-        private readonly List<ClassInfo> associationTypes = [];
+        public IReadOnlyList<TypeInfo> AssociationTypes => associationTypes;
+        private readonly List<TypeInfo> associationTypes = [];
 
         public IReadOnlyList<EnumInfo> AssociationEnums => associationEnums;
         private readonly List<EnumInfo> associationEnums = [];
@@ -107,10 +107,10 @@ namespace MarkdownDocumentGenerator
         {
             var namedTypeSymbol = (INamedTypeSymbol)propertyTypeSymbol;
 
-            var classInfo = new ClassInfo(namedTypeSymbol);
+            var typeInfo = new TypeInfo(namedTypeSymbol);
 
             // 循環参照を防ぐため、すでに取得済みのクラスはスキップする
-            if (associationTypes.Any(x => x.FullName == classInfo.FullName))
+            if (associationTypes.Any(x => x.FullName == typeInfo.FullName))
             {
                 return;
             }
@@ -119,8 +119,8 @@ namespace MarkdownDocumentGenerator
             if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyTypeSymbol.ContainingAssembly))
             {
                 // この型を直接情報として追加する
-                associationTypes.Add(classInfo);
-                classInfo.InternalCollectProperties(classInfo.Symbol, currentDepth + 1, maxDepth);
+                associationTypes.Add(typeInfo);
+                typeInfo.InternalCollectProperties(typeInfo.Symbol, currentDepth + 1, maxDepth);
             }
 
             // List<T>とかジェネリックの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
@@ -131,14 +131,14 @@ namespace MarkdownDocumentGenerator
 
             foreach (var targetTypeArgument in targetTypeArguments)
             {
-                var argumentClassInfo = new ClassInfo(targetTypeArgument);
-                if (associationTypes.Any(x => x.FullName == argumentClassInfo.FullName))
+                var argumentTypeInfo = new TypeInfo(targetTypeArgument);
+                if (associationTypes.Any(x => x.FullName == argumentTypeInfo.FullName))
                 {
                     continue;
                 }
 
-                associationTypes.Add(argumentClassInfo);
-                argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, currentDepth + 1, maxDepth);
+                associationTypes.Add(argumentTypeInfo);
+                argumentTypeInfo.InternalCollectProperties(argumentTypeInfo.Symbol, currentDepth + 1, maxDepth);
             }
         }
 

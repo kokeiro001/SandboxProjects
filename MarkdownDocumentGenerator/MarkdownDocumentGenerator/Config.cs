@@ -5,7 +5,7 @@ namespace MarkdownDocumentGenerator
 {
     public record Config
     {
-        public string TargetBaseClassName { get; init; } = ""; // ex. DTO.DTOBase
+        public string TargetBaseTypeName { get; init; } = ""; // ex. DTO.DTOBase
 
         public string ProjectPath { get; init; } = "";
 
@@ -17,9 +17,9 @@ namespace MarkdownDocumentGenerator
 
             var stringBuilder = new StringBuilder();
 
-            if (string.IsNullOrWhiteSpace(config.TargetBaseClassName))
+            if (string.IsNullOrWhiteSpace(config.TargetBaseTypeName))
             {
-                stringBuilder.AppendLine($"{nameof(TargetBaseClassName)} is required.");
+                stringBuilder.AppendLine($"{nameof(TargetBaseTypeName)} is required.");
             }
 
             if (string.IsNullOrWhiteSpace(config.ProjectPath))

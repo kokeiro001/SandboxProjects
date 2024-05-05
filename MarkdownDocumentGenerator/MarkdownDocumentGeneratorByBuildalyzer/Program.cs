@@ -39,9 +39,9 @@ namespace MarkdownDocumentGeneratorByBuildalyzer
             Console.WriteLine(compilation.GlobalNamespace);
 
 
-            var targetSymbol = compilation.GetTypeByMetadataName(config.TargetBaseClassName);
+            var targetSymbol = compilation.GetTypeByMetadataName(config.TargetBaseTypeName);
 
-            var baseClassName = config.TargetBaseClassName;
+            var baseClassName = config.TargetBaseTypeName;
 
             // 対象クラスのシンボルを取得
             var baseClassSymbol = compilation.GetTypeByMetadataName(baseClassName);

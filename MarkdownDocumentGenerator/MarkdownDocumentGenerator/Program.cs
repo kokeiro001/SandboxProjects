@@ -27,25 +27,23 @@ namespace MarkdownDocumentGenerator
             using var workspace = MSBuildWorkspace.Create();
             var project = await workspace.OpenProjectAsync(config.ProjectPath);
 
-            var classInfoCollector = new ClassInfoCollector(project);
+            var typeInfoCollector = new TypeInfoCollector(project);
 
-            var classInfos = await classInfoCollector.Collect(config.TargetBaseClassName);
-
-            //classInfos.DumpConsole();
+            var typeInfos = await typeInfoCollector.Collect(config.TargetBaseTypeName);
 
             var repositoryPath = Repository.Discover(Path.GetDirectoryName(config.ProjectPath));
 
-            foreach (var classInfo in classInfos)
+            foreach (var typeInfo in typeInfos)
             {
                 var gitRepositoryInfo = GetRepositoryInfo(repositoryPath);
 
-                var renderMarkdownModel = new RenderMarkdownModel(classInfo)
+                var renderMarkdownModel = new RenderMarkdownModel(typeInfo)
                 {
                     RenderProjectGitBranch = gitRepositoryInfo.branch,
                     RenderProjectGitCommitHash = gitRepositoryInfo.lastCommitHash,
                 };
 
-                var outputMarkdownFilepath = Path.Combine(config.OutputMarkdownDirectory, $"{classInfo.DisplayName}.md");
+                var outputMarkdownFilepath = Path.Combine(config.OutputMarkdownDirectory, $"{typeInfo.DisplayName}.md");
 
                 await RenderMarkdown(renderMarkdownModel, outputMarkdownFilepath);
             }
@@ -62,12 +60,12 @@ namespace MarkdownDocumentGenerator
             var result = await template.RunAsync(renderMarkdownModel);
             await File.WriteAllTextAsync(outputMarkdownFilepath, result);
 
-            Console.WriteLine($"Finish RenderMarkdown {renderMarkdownModel.ClassInfo.DisplayName}");
+            Console.WriteLine($"Finish RenderMarkdown {renderMarkdownModel.TypeInfo.DisplayName}");
         }
 
-        public class RenderMarkdownModel(ClassInfo classInfo)
+        public class RenderMarkdownModel(TypeInfo typeInfo)
         {
-            public ClassInfo ClassInfo { get; } = classInfo;
+            public TypeInfo TypeInfo { get; } = typeInfo;
 
             public DateTimeOffset RenderDateTime { get; init; } = DateTimeOffset.Now;
 

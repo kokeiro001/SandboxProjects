@@ -3,11 +3,11 @@ using Microsoft.CodeAnalysis.MSBuild;
 
 namespace MarkdownDocumentGenerator.Test
 {
-    public class ClassInfoFixture
+    public class TypeInfoFixture
     {
-        public ClassInfo[] ClassInfos { get; }
+        public TypeInfo[] TypeInfos { get; }
 
-        public ClassInfoFixture()
+        public TypeInfoFixture()
         {
             var currentDirectory = new Uri(Environment.CurrentDirectory, UriKind.Absolute);
             var relative = new Uri("../../../DTO/DTO.csproj", UriKind.Relative);
@@ -18,9 +18,9 @@ namespace MarkdownDocumentGenerator.Test
 
             var project = workspace.OpenProjectAsync(projectPath.AbsolutePath).Result;
 
-            var classInfoCollector = new ClassInfoCollector(project);
+            var typeInfoCollector = new TypeInfoCollector(project);
 
-            ClassInfos = classInfoCollector.Collect("DTO.DTOBase").Result;
+            TypeInfos = typeInfoCollector.Collect("DTO.DTOBase").Result;
         }
     }
 }

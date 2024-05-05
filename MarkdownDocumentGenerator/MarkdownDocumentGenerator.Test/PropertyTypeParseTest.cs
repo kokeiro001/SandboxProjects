@@ -1,6 +1,6 @@
 ﻿namespace MarkdownDocumentGenerator.Test
 {
-    public class PropertyTypeParseTest(ClassInfoFixture classInfoFixture) : IClassFixture<ClassInfoFixture>
+    public class PropertyTypeParseTest(TypeInfoFixture typeInfoFixture) : IClassFixture<TypeInfoFixture>
     {
         [Theory]
         [InlineData("DTO.Player", "Name", "string")]
@@ -31,14 +31,14 @@
         [InlineData("DTO.NullableDTO", "NullableIntNullableList", "List<int?>?")]
         [InlineData("DTO.NullableDTO", "NullableIntNullableListNullableList", "List<List<int?>?>?")]
         [InlineData("DTO.DictionaryDTO", "Players", "Dictionary<int, Player>")]
-        public void PropertyTypeParse(string fullClassName, string propertyDisplayName, string expectedDisplayTypeName)
+        public void PropertyTypeParse(string fullTypeName, string propertyDisplayName, string expectedDisplayTypeName)
         {
-            var targetClassInfo = classInfoFixture.ClassInfos
-                .FirstOrDefault(x => x.FullName == fullClassName);
+            var targetTypeInfo = typeInfoFixture.TypeInfos
+                .FirstOrDefault(x => x.FullName == fullTypeName);
 
-            Assert.NotNull(targetClassInfo);
+            Assert.NotNull(targetTypeInfo);
 
-            var targetPropertyInfo = targetClassInfo.Properties
+            var targetPropertyInfo = targetTypeInfo.Properties
                 .FirstOrDefault(x => x.DisplayName == propertyDisplayName);
 
             Assert.NotNull(targetPropertyInfo);

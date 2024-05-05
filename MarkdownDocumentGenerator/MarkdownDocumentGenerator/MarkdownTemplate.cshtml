@@ -1,33 +1,33 @@
-﻿# @Model.ClassInfo.DisplayName
+﻿# @Model.TypeInfo.DisplayName
 
 ## 概要
 
-@Model.ClassInfo.Summary.Replace("\n", "<br>")
+@Model.TypeInfo.Summary.Replace("\n", "<br>")
 
-@if (!string.IsNullOrEmpty(Model.ClassInfo.Remarks))
+@if (!string.IsNullOrEmpty(Model.TypeInfo.Remarks))
 {
     @("### 備考\n")
     @("\n")
-    @(@Model.ClassInfo.Remarks + "\n")
+    @(@Model.TypeInfo.Remarks + "\n")
 }
 ## プロパティ
 
 | 型名 | 名前 | 説明 | 備考 |
 | ---: | ---- | ---- | ---- |
-@foreach (var property in @Model.ClassInfo.Properties)
+@foreach (var property in @Model.TypeInfo.Properties)
 {
     string record = string.Join(" | ", [$"`{property.DisplayTypeName}`", $"`{property.DisplayName}`", property.Summary, property.Remarks]);
     record = record.Replace("\n", "<br>");
     @("| " + record + " |\n")
 }
 
-@if (@Model.ClassInfo.AssociationTypes.Count > 0)
+@if (@Model.TypeInfo.AssociationTypes.Count > 0)
 {
     @("---\n\n")
 
     @("## 関連クラス/構造体\n\n")
 
-    @foreach (var associationClass in @Model.ClassInfo.AssociationTypes)
+    @foreach (var associationClass in @Model.TypeInfo.AssociationTypes)
     {
         @($"### {associationClass.DisplayName}\n")
         @("\n")
@@ -58,7 +58,7 @@
             @("| " + record + " |\n")
         }
 
-        var isLast = Model.ClassInfo.AssociationTypes[Model.ClassInfo.AssociationTypes.Count - 1] == associationClass;
+        var isLast = Model.TypeInfo.AssociationTypes[Model.TypeInfo.AssociationTypes.Count - 1] == associationClass;
 
         @if(!isLast)
         {
@@ -68,13 +68,13 @@
     }
 }
 
-@if (@Model.ClassInfo.AssociationEnums.Count > 0)
+@if (@Model.TypeInfo.AssociationEnums.Count > 0)
 {
     @("---\n\n")
 
     @("## 関連Enum\n\n")
 
-    @foreach (var associationEnum in @Model.ClassInfo.AssociationEnums)
+    @foreach (var associationEnum in @Model.TypeInfo.AssociationEnums)
     {
         @($"### {associationEnum.DisplayName}\n")
         @("\n")
@@ -105,7 +105,7 @@
             @("| " + record + " |\n")
         }
 
-        var isLast = Model.ClassInfo.AssociationEnums[Model.ClassInfo.AssociationEnums.Count - 1] == associationEnum;
+        var isLast = Model.TypeInfo.AssociationEnums[Model.TypeInfo.AssociationEnums.Count - 1] == associationEnum;
 
         @if(!isLast)
         {

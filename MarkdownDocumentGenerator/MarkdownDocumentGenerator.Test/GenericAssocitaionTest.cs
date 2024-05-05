@@ -1,22 +1,22 @@
 ﻿namespace MarkdownDocumentGenerator.Test
 {
-    public class GenericAssocitaionTest(ClassInfoFixture classInfoFixture) : IClassFixture<ClassInfoFixture>
+    public class GenericAssocitaionTest(TypeInfoFixture typeInfoFixture) : IClassFixture<TypeInfoFixture>
     {
         [Theory]
         [InlineData("DTO.ListAssociationDTO", "Player")]
         [InlineData("DTO.ArrayAssociationDTO", "Player")]
-        public void CollectedGenericAccotiaionClasses(string fullClassName, string expectedAssociationClassName)
+        public void CollectedGenericAccotiaionTypes(string fullTypeName, string expectedAssociationTypeName)
         {
-            var targetClassInfo = classInfoFixture.ClassInfos
-                .FirstOrDefault(x => x.FullName == fullClassName);
+            var targetTypeInfo = typeInfoFixture.TypeInfos
+                .FirstOrDefault(x => x.FullName == fullTypeName);
 
-            Assert.NotNull(targetClassInfo);
+            Assert.NotNull(targetTypeInfo);
 
-            Assert.Single(targetClassInfo.AssociationTypes);
+            Assert.Single(targetTypeInfo.AssociationTypes);
 
-            var associationClass = targetClassInfo.AssociationTypes.First();
+            var associationType = targetTypeInfo.AssociationTypes.First();
 
-            Assert.Equal(expectedAssociationClassName, associationClass.DisplayName);
+            Assert.Equal(expectedAssociationTypeName, associationType.DisplayName);
         }
     }
 }
