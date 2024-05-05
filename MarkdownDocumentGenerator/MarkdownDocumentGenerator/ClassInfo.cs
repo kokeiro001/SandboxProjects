@@ -71,7 +71,6 @@ namespace MarkdownDocumentGenerator
             // プロパティとして取得した型がクラスか構造体の場合、関連クラスとして追加する
             foreach (var propertyInfo in properties)
             {
-                //  TODO: 構造体の場合も同様の処理でいける？ or TypeKind.Struct でいける？
                 if (propertyInfo.Symbol.Type.TypeKind is TypeKind.Class or TypeKind.Struct)
                 {
                     var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
@@ -110,11 +109,8 @@ namespace MarkdownDocumentGenerator
                         argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, currentDepth + 1, maxDepth);
                     }
                 }
-            }
 
-            // プロパティとして取得した形がenumの場合、enumの値を取得する
-            foreach (var propertyInfo in properties)
-            {
+                // プロパティとして取得した形がenumの場合、enumの値を取得する
                 if (propertyInfo.Symbol.Type.TypeKind == TypeKind.Enum)
                 {
                     var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
