@@ -79,22 +79,7 @@ namespace MarkdownDocumentGenerator
                 // プロパティとして取得した形がenumの場合、enumの値を取得する
                 if (propertyInfo.Symbol.Type.TypeKind == TypeKind.Enum)
                 {
-                    var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
-
-                    var enumInfo = new EnumInfo(namedTypoeSymbol);
-
-                    // 循環参照を防ぐため、すでに取得済みのenumはスキップする
-                    if (associationEnums.Any(x => x.FullName == enumInfo.FullName))
-                    {
-                        continue;
-                    }
-
-                    // 同一アセンブリで定義されている独自のenumのみ対象とする
-                    if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyInfo.Symbol.Type.ContainingAssembly))
-                    {
-                        // この型を直接情報として追加する
-                        associationEnums.Add(enumInfo);
-                    }
+                    HandleEnum(baseSymbol, propertyInfo);
                 }
             }
         }
@@ -135,6 +120,26 @@ namespace MarkdownDocumentGenerator
 
                 associationClasses.Add(argumentClassInfo);
                 argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, currentDepth + 1, maxDepth);
+            }
+        }
+
+        private void HandleEnum(INamedTypeSymbol baseSymbol, PropertyInfo propertyInfo)
+        {
+            var namedTypoeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
+
+            var enumInfo = new EnumInfo(namedTypoeSymbol);
+
+            // 循環参照を防ぐため、すでに取得済みのenumはスキップする
+            if (associationEnums.Any(x => x.FullName == enumInfo.FullName))
+            {
+                return;
+            }
+
+            // 同一アセンブリで定義されている独自のenumのみ対象とする
+            if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyInfo.Symbol.Type.ContainingAssembly))
+            {
+                // この型を直接情報として追加する
+                associationEnums.Add(enumInfo);
             }
         }
 
