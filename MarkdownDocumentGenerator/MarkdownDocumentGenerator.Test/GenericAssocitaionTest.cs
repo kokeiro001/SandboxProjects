@@ -5,16 +5,16 @@
         [Theory]
         [InlineData("DTO.ListAssociationDTO", "Player")]
         [InlineData("DTO.ArrayAssociationDTO", "Player")]
-        public void CollectedGenericAccotiaion(string fullClassName, string expectedAssociationClassName)
+        public void CollectedGenericAccotiaionClasses(string fullClassName, string expectedAssociationClassName)
         {
             var targetClassInfo = classInfoFixture.ClassInfos
                 .FirstOrDefault(x => x.FullName == fullClassName);
 
             Assert.NotNull(targetClassInfo);
 
-            Assert.Single(targetClassInfo.AssociationClasses);
+            Assert.Single(targetClassInfo.AssociationTypes);
 
-            var associationClass = targetClassInfo.AssociationClasses.First();
+            var associationClass = targetClassInfo.AssociationTypes.First();
 
             Assert.Equal(expectedAssociationClassName, associationClass.DisplayName);
         }

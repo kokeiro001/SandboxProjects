@@ -21,13 +21,13 @@
     @("| " + record + " |\n")
 }
 
-@if (@Model.ClassInfo.AssociationClasses.Count > 0)
+@if (@Model.ClassInfo.AssociationTypes.Count > 0)
 {
     @("---\n\n")
 
     @("## 関連クラス/構造体\n\n")
 
-    @foreach (var associationClass in @Model.ClassInfo.AssociationClasses)
+    @foreach (var associationClass in @Model.ClassInfo.AssociationTypes)
     {
         @($"### {associationClass.DisplayName}\n")
         @("\n")
@@ -58,7 +58,7 @@
             @("| " + record + " |\n")
         }
 
-        var isLast = Model.ClassInfo.AssociationClasses[Model.ClassInfo.AssociationClasses.Count - 1] == associationClass;
+        var isLast = Model.ClassInfo.AssociationTypes[Model.ClassInfo.AssociationTypes.Count - 1] == associationClass;
 
         @if(!isLast)
         {

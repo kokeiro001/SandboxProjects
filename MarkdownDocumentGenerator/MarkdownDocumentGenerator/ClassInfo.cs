@@ -34,8 +34,14 @@ namespace MarkdownDocumentGenerator
 
         public string FullName => string.IsNullOrEmpty(Namespace) ? DisplayName : $"{Namespace}.{DisplayName}";
 
-        public IReadOnlyList<ClassInfo> AssociationClasses => associationClasses;
-        private readonly List<ClassInfo> associationClasses = [];
+        /// <summary>
+        /// 関連するクラス、構造体の一覧
+        /// </summary>
+        /// <remarks>
+        /// Typeって名前だと解釈できる範囲が広すぎるので本当は狭めたいがいい名前がわからない。
+        /// </remarks>
+        public IReadOnlyList<ClassInfo> AssociationTypes => associationTypes;
+        private readonly List<ClassInfo> associationTypes = [];
 
         public IReadOnlyList<EnumInfo> AssociationEnums => associationEnums;
         private readonly List<EnumInfo> associationEnums = [];
@@ -104,7 +110,7 @@ namespace MarkdownDocumentGenerator
             var classInfo = new ClassInfo(namedTypeSymbol);
 
             // 循環参照を防ぐため、すでに取得済みのクラスはスキップする
-            if (associationClasses.Any(x => x.FullName == classInfo.FullName))
+            if (associationTypes.Any(x => x.FullName == classInfo.FullName))
             {
                 return;
             }
@@ -113,7 +119,7 @@ namespace MarkdownDocumentGenerator
             if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyTypeSymbol.ContainingAssembly))
             {
                 // この型を直接情報として追加する
-                associationClasses.Add(classInfo);
+                associationTypes.Add(classInfo);
                 classInfo.InternalCollectProperties(classInfo.Symbol, currentDepth + 1, maxDepth);
             }
 
@@ -126,12 +132,12 @@ namespace MarkdownDocumentGenerator
             foreach (var targetTypeArgument in targetTypeArguments)
             {
                 var argumentClassInfo = new ClassInfo(targetTypeArgument);
-                if (associationClasses.Any(x => x.FullName == argumentClassInfo.FullName))
+                if (associationTypes.Any(x => x.FullName == argumentClassInfo.FullName))
                 {
                     continue;
                 }
 
-                associationClasses.Add(argumentClassInfo);
+                associationTypes.Add(argumentClassInfo);
                 argumentClassInfo.InternalCollectProperties(argumentClassInfo.Symbol, currentDepth + 1, maxDepth);
             }
         }
