@@ -87,7 +87,7 @@ namespace MarkdownDocumentGenerator
                         HandleClassOrStruct(propertyInfo.Symbol.Type, baseSymbol, currentDepth, maxDepth);
                         break;
                     case TypeKind.Enum:
-                        HandleEnum(baseSymbol, propertyInfo);
+                        HandleEnum(propertyInfo.Symbol.Type, baseSymbol);
                         break;
                 }
             }
@@ -96,11 +96,22 @@ namespace MarkdownDocumentGenerator
         private void HandleArray(ITypeSymbol propertyTypeSymbol, INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
         {
             var arrayTypeSymbol = (IArrayTypeSymbol)propertyTypeSymbol;
-            var propertyNamedTypeSymbol = (INamedTypeSymbol)arrayTypeSymbol.ElementType;
+            var elementTypeSymbol = (INamedTypeSymbol)arrayTypeSymbol.ElementType;
 
-            HandleClassOrStruct(propertyNamedTypeSymbol, baseSymbol, currentDepth, maxDepth);
+            switch (elementTypeSymbol.TypeKind)
+            {
+                case TypeKind.Array:
+                    HandleArray(elementTypeSymbol, baseSymbol, currentDepth, maxDepth);
+                    break;
+                case TypeKind.Class:
+                case TypeKind.Struct:
+                    HandleClassOrStruct(elementTypeSymbol, baseSymbol, currentDepth, maxDepth);
+                    break;
+                case TypeKind.Enum:
+                    HandleEnum(elementTypeSymbol, baseSymbol);
+                    break;
+            }
 
-            // FIXME: Enumの場合にうまく動かないので修正する
         }
 
         private void HandleClassOrStruct(ITypeSymbol propertyTypeSymbol, INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
@@ -142,9 +153,9 @@ namespace MarkdownDocumentGenerator
             }
         }
 
-        private void HandleEnum(INamedTypeSymbol baseSymbol, PropertyInfo propertyInfo)
+        private void HandleEnum(ITypeSymbol propertyTypeSymbol, INamedTypeSymbol baseSymbol)
         {
-            var namedTypeSymbol = (INamedTypeSymbol)propertyInfo.Symbol.Type;
+            var namedTypeSymbol = (INamedTypeSymbol)propertyTypeSymbol;
 
             var enumInfo = new EnumInfo(namedTypeSymbol);
 
@@ -155,7 +166,7 @@ namespace MarkdownDocumentGenerator
             }
 
             // 同一アセンブリで定義されている独自のenumのみ対象とする
-            if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyInfo.Symbol.Type.ContainingAssembly))
+            if (AreContainingSameAssembly(baseSymbol.ContainingAssembly, propertyTypeSymbol.ContainingAssembly))
             {
                 // この型を直接情報として追加する
                 associationEnums.Add(enumInfo);

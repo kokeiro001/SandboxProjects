@@ -264,6 +264,7 @@
     public class ListAssociationDTO : DTOBase
     {
         public List<Player> Players { get; set; } = [];
+        public List<MoveType> MoveTypes { get; set; } = [];
     }
 
     /// <summary>
@@ -272,5 +273,6 @@
     public class ArrayAssociationDTO : DTOBase
     {
         public Player[] Players { get; set; } = [];
+        public MoveType[] MoveTypes { get; set; } = [];
     }
 }
