@@ -20,8 +20,8 @@
         }
 
         [Theory]
-        [InlineData("DTO.ListAssociationDTO", "MoveTypes")]
-        [InlineData("DTO.ArrayAssociationDTO", "MoveTypes")]
+        [InlineData("DTO.ListAssociationDTO", "MoveType")]
+        [InlineData("DTO.ArrayAssociationDTO", "MoveType")]
         public void CollectedGenericAccotiaionEnums(string fullTypeName, string expectedAssociationEnumName)
         {
             var targetTypeInfo = typeInfoFixture.TypeInfos
@@ -29,11 +29,11 @@
 
             Assert.NotNull(targetTypeInfo);
 
-            Assert.Single(targetTypeInfo.AssociationTypes);
+            Assert.Single(targetTypeInfo.AssociationEnums);
 
-            var associationType = targetTypeInfo.AssociationTypes.First();
+            var associationEnum = targetTypeInfo.AssociationEnums.First();
 
-            Assert.Equal(expectedAssociationEnumName, associationType.DisplayName);
+            Assert.Equal(expectedAssociationEnumName, associationEnum.DisplayName);
         }
     }
 }

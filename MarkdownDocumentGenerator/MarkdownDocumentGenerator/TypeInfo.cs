@@ -111,7 +111,6 @@ namespace MarkdownDocumentGenerator
                     HandleEnum(elementTypeSymbol, baseSymbol);
                     break;
             }
-
         }
 
         private void HandleClassOrStruct(ITypeSymbol propertyTypeSymbol, INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
@@ -135,21 +134,25 @@ namespace MarkdownDocumentGenerator
             }
 
             // List<T>とかジェネリックの場合、直接のNamespaceがSystemだったりするのでTの情報で判断する必要がある
-            var targetTypeArguments = namedTypeSymbol.TypeArguments.OfType<INamedTypeSymbol>()
-                .Where(x => x.TypeKind is TypeKind.Class)
+            var sameAssemblyTypeArgumentSymbols = namedTypeSymbol.TypeArguments.OfType<INamedTypeSymbol>()
                 .Where(x => AreContainingSameAssembly(baseSymbol.ContainingAssembly, x.ContainingAssembly))
                 .ToArray();
 
-            foreach (var targetTypeArgument in targetTypeArguments)
+            foreach (var sameAssemblyTypeArgumentSymbol in sameAssemblyTypeArgumentSymbols)
             {
-                var argumentTypeInfo = new TypeInfo(targetTypeArgument);
-                if (associationTypes.Any(x => x.FullName == argumentTypeInfo.FullName))
+                switch (sameAssemblyTypeArgumentSymbol.TypeKind)
                 {
-                    continue;
+                    case TypeKind.Array:
+                        HandleArray(sameAssemblyTypeArgumentSymbol, baseSymbol, currentDepth, maxDepth);
+                        break;
+                    case TypeKind.Class:
+                    case TypeKind.Struct:
+                        HandleClassOrStruct(sameAssemblyTypeArgumentSymbol, baseSymbol, currentDepth, maxDepth);
+                        break;
+                    case TypeKind.Enum:
+                        HandleEnum(sameAssemblyTypeArgumentSymbol, baseSymbol);
+                        break;
                 }
-
-                associationTypes.Add(argumentTypeInfo);
-                argumentTypeInfo.InternalCollectProperties(argumentTypeInfo.Symbol, currentDepth + 1, maxDepth);
             }
         }
 
