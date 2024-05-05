@@ -74,22 +74,27 @@ namespace MarkdownDocumentGenerator
                 currentSymbol = currentSymbol.BaseType;
             }
 
-            // プロパティとして取得した型がクラスか構造体の場合、関連クラスとして追加する
+            // プロパティとして取得した型の関連情報を取得する
             foreach (var propertyInfo in properties)
             {
-                switch (propertyInfo.Symbol.Type.TypeKind)
-                {
-                    case TypeKind.Array:
-                        HandleArray(propertyInfo.Symbol.Type, baseSymbol, currentDepth, maxDepth);
-                        break;
-                    case TypeKind.Class:
-                    case TypeKind.Struct:
-                        HandleClassOrStruct(propertyInfo.Symbol.Type, baseSymbol, currentDepth, maxDepth);
-                        break;
-                    case TypeKind.Enum:
-                        HandleEnum(propertyInfo.Symbol.Type, baseSymbol);
-                        break;
-                }
+                HandleSymbolByTypeKind(propertyInfo.Symbol.Type, baseSymbol, currentDepth, maxDepth);
+            }
+        }
+
+        private void HandleSymbolByTypeKind(ITypeSymbol handleSymbol, INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
+        {
+            switch (handleSymbol.TypeKind)
+            {
+                case TypeKind.Array:
+                    HandleArray(handleSymbol, baseSymbol, currentDepth, maxDepth);
+                    break;
+                case TypeKind.Class:
+                case TypeKind.Struct:
+                    HandleClassOrStruct(handleSymbol, baseSymbol, currentDepth, maxDepth);
+                    break;
+                case TypeKind.Enum:
+                    HandleEnum(handleSymbol, baseSymbol);
+                    break;
             }
         }
 
@@ -98,19 +103,7 @@ namespace MarkdownDocumentGenerator
             var arrayTypeSymbol = (IArrayTypeSymbol)propertyTypeSymbol;
             var elementTypeSymbol = (INamedTypeSymbol)arrayTypeSymbol.ElementType;
 
-            switch (elementTypeSymbol.TypeKind)
-            {
-                case TypeKind.Array:
-                    HandleArray(elementTypeSymbol, baseSymbol, currentDepth, maxDepth);
-                    break;
-                case TypeKind.Class:
-                case TypeKind.Struct:
-                    HandleClassOrStruct(elementTypeSymbol, baseSymbol, currentDepth, maxDepth);
-                    break;
-                case TypeKind.Enum:
-                    HandleEnum(elementTypeSymbol, baseSymbol);
-                    break;
-            }
+            HandleSymbolByTypeKind(elementTypeSymbol, baseSymbol, currentDepth, maxDepth);
         }
 
         private void HandleClassOrStruct(ITypeSymbol propertyTypeSymbol, INamedTypeSymbol baseSymbol, int currentDepth, int maxDepth)
@@ -140,19 +133,7 @@ namespace MarkdownDocumentGenerator
 
             foreach (var sameAssemblyTypeArgumentSymbol in sameAssemblyTypeArgumentSymbols)
             {
-                switch (sameAssemblyTypeArgumentSymbol.TypeKind)
-                {
-                    case TypeKind.Array:
-                        HandleArray(sameAssemblyTypeArgumentSymbol, baseSymbol, currentDepth, maxDepth);
-                        break;
-                    case TypeKind.Class:
-                    case TypeKind.Struct:
-                        HandleClassOrStruct(sameAssemblyTypeArgumentSymbol, baseSymbol, currentDepth, maxDepth);
-                        break;
-                    case TypeKind.Enum:
-                        HandleEnum(sameAssemblyTypeArgumentSymbol, baseSymbol);
-                        break;
-                }
+                HandleSymbolByTypeKind(sameAssemblyTypeArgumentSymbol, baseSymbol, currentDepth, maxDepth);
             }
         }
 
